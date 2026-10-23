@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cardly — Study smarter</title>
+<meta name="description" content="Cardly — flashcards, learn mode, practice tests, match game. Share sets with anyone with a link.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%234255FF'/><rect x='14' y='20' width='28' height='24' rx='5' fill='white' opacity='.9'/><rect x='22' y='14' width='28' height='24' rx='5' fill='%23FFCD1F'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script>(function(){try{var t=localStorage.getItem('cardly:theme');if(!t){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+<style>
+/* ================= Cardly design system ================= */
+:root{
+  --bg:#F6F7FB; --bg-trans:rgba(246,247,251,.85);
+  --surface:#FFFFFF; --surface2:#EFF1F8;
+  --text:#282E3E; --muted:#646F90; --border:#E2E5F0;
+  --primary:#4255FF; --primary-h:#3446E0; --primary-soft:#EAEDFF;
+  --accent:#FFCD1F; --success:#00B34C; --danger:#FF5A5F; --warn:#FF9500;
+  --shadow:0 1px 2px rgba(40,46,62,.05),0 6px 20px rgba(40,46,62,.07);
+  --shadow-lg:0 4px 12px rgba(40,46,62,.08),0 16px 40px rgba(40,46,62,.14);
+  --radius:16px;
+}
+[data-theme="dark"]{
+  --bg:#0E1016; --bg-trans:rgba(14,16,22,.86);
+  --surface:#171B26; --surface2:#1F2432;
+  --text:#E9EBF4; --muted:#9AA3BD; --border:#2A3042;
+  --primary:#6B7CFF; --primary-h:#8A97FF; --primary-soft:#242B4E;
+  --accent:#FFCD1F; --success:#2EE27A; --danger:#FF6B70; --warn:#FFB02E;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.35);
+  --shadow-lg:0 6px 16px rgba(0,0,0,.4),0 20px 50px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+body.no-scroll{overflow:hidden}
+h1,h2,h3{line-height:1.25;margin:0;letter-spacing:-.02em}
+p{margin:0}
+a{color:inherit}
+button{font-family:inherit}
+svg{display:block;flex-shrink:0}
+.container{max-width:1080px;margin:0 auto;padding:0 22px 70px}
+.muted{color:var(--muted)} .sm{font-size:12.5px}
+
+/* ---------- splash ---------- */
+#splash{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .45s}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-badge{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#4255FF,#8A5CFF);color:#fff;font-size:30px;font-weight:800;display:grid;place-items:center;box-shadow:0 12px 30px rgba(66,85,255,.4)}
+.splash-name{font-weight:800;font-size:20px;letter-spacing:-.02em}
+.spinner{width:26px;height:26px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--primary);animation:spin .8s linear infinite}
+
+/* ---------- top bar ---------- */
+#topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px;padding:0 max(22px,calc(50vw - 540px));background:var(--bg-trans);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo-badge{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#4255FF,#8A5CFF);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(66,85,255,.35)}
+.logo-badge svg{width:18px;height:18px}
+.logo-word{font-weight:800;font-size:19px;letter-spacing:-.03em}
+.top-actions{display:flex;align-items:center;gap:6px}
+.icon-btn{width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--muted);cursor:pointer;transition:.15s;padding:0}
+.icon-btn:hover{background:var(--surface2);color:var(--text)}
+.icon-btn.on{color:var(--primary);background:var(--primary-soft)}
+.icon-btn:disabled{opacity:.4;cursor:not-allowed}
+.icon-btn svg{width:19px;height:19px}
+.profile-wrap{position:relative;margin-left:4px}
+.profile-chip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:4px 12px 4px 4px;cursor:pointer;font:600 13.5px 'Inter',sans-serif;color:var(--text);transition:.15s}
+.profile-chip:hover{border-color:var(--primary)}
+.avatar{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.avatar.ai{display:grid;place-items:center;background:linear-gradient(135deg,#4255FF,#8A5CFF);color:#fff;font-size:12px;font-weight:700}
+.dropdown{position:absolute;right:0;top:calc(100% + 10px);background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);min-width:250px;padding:8px;z-index:60;animation:pop .18s}
+.dd-head{padding:10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;text-align:left}
+.dd-head b{display:block;font-size:14px}
+.dd-item{display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;border-radius:10px;background:none;border:none;cursor:pointer;font:500 14px 'Inter',sans-serif;color:var(--text);text-align:left;transition:.12s}
+.dd-item:hover{background:var(--surface2)}
+.dd-item.danger{color:var(--danger)}
+.dd-item svg{width:17px;height:17px;color:var(--muted)}
+.dd-item.danger svg{color:var(--danger)}
+.dd-sep{height:1px;background:var(--border);margin:6px 4px}
+.sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--surface2);color:var(--muted);margin-left:6px}
+.sync-pill.ok{background:rgba(0,179,76,.12);color:var(--success)}
+.sync-pill.bad{background:rgba(255,90,95,.12);color:var(--danger)}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 14px 'Inter',sans-serif;padding:0 18px;height:44px;border-radius:11px;border:1.5px solid transparent;cursor:pointer;transition:.16s;user-select:none;white-space:nowrap;text-decoration:none;color:var(--text)}
+.btn svg{width:17px;height:17px}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-h);transform:translateY(-1px);box-shadow:0 6px 16px rgba(66,85,255,.35)}
+.btn.outline{background:var(--surface);border-color:var(--border)}
+.btn.outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn.ghost{background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--surface2);color:var(--text)}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.danger:hover{filter:brightness(.94)}
+.btn.yellow{background:var(--accent);color:#282E3E}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+.btn.sm{height:36px;padding:0 13px;font-size:13px;border-radius:9px}
+.btn.block{width:100%}
+.btn.google{background:var(--surface);border-color:var(--border);color:var(--text);height:46px}
+.btn.google:hover{border-color:var(--primary)}
+
+/* ---------- forms ---------- */
+.input{width:100%;height:44px;padding:0 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:14.5px;outline:none;transition:.15s}
+textarea.input{height:auto;padding:12px 14px;font-size:14px;line-height:1.55;resize:vertical}
+.input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.input.input-lg{height:52px;font-size:18px;font-weight:700}
+select.input{width:auto;min-width:160px;cursor:pointer}
+input[type="checkbox"],input[type="range"]{accent-color:var(--primary)}
+.check{display:flex;gap:9px;align-items:center;font-size:14px;cursor:pointer;user-select:none}
+.check input{width:16px;height:16px;cursor:pointer}
+</style>
+
+<style>
+/* ---------- home ---------- */
+.hero{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:30px 0 4px;flex-wrap:wrap}
+.hero h1{font-size:clamp(24px,3.4vw,32px);font-weight:800}
+.accent-underline{box-shadow:inset 0 -.34em 0 rgba(255,205,31,.55)}
+.hero p{color:var(--muted);margin-top:6px;font-size:15px}
+.hero p b{color:var(--text)}
+.stat-row{display:flex;gap:10px;flex-wrap:wrap}
+.stat{display:flex;gap:11px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:11px 16px;box-shadow:var(--shadow)}
+.stat b{font-size:18px;display:block;line-height:1.15}
+.stat>div>span:last-child,.stat .stat-lab{font-size:11.5px;color:var(--muted);font-weight:500}
+.stat-ico{width:36px;height:36px;border-radius:11px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center}
+.stat-ico svg{width:18px;height:18px}
+.stat-ico.flame-ico{background:rgba(255,140,40,.16);color:#FF7A1A}
+.toolbar{display:flex;gap:12px;margin:22px 0 4px;flex-wrap:wrap}
+.toolbar-btns{display:flex;gap:8px}
+.search-box{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:0 14px;height:46px;color:var(--muted);transition:.15s}
+.search-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.search-box svg{width:18px;height:18px}
+.search-box input{border:none;outline:none;background:none;flex:1;font:inherit;color:var(--text);min-width:0}
+.set-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:16px;padding:20px 0 20px}
+.set-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);transition:.18s;cursor:pointer;display:flex;flex-direction:column;gap:8px;animation:slideUp .3s both}
+.set-card:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:var(--shadow-lg)}
+.set-card-top{display:flex;justify-content:space-between;align-items:flex-start}
+.set-emoji{font-size:30px;line-height:1}
+.set-emoji.xl{font-size:54px}
+.set-card h3{font-size:16.5px;font-weight:700}
+.set-desc{color:var(--muted);font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.set-card-meta{display:flex;gap:7px;color:var(--muted);font-size:12.5px;align-items:center;flex-wrap:wrap}
+.set-badges{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:11.5px;font-weight:700;background:var(--surface2);color:var(--muted);padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill.accent{background:rgba(255,205,31,.18);color:#B8860B}
+[data-theme="dark"] .pill.accent{color:var(--accent)}
+.empty{border:2px dashed var(--border);border-radius:var(--radius);padding:44px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted);text-align:center}
+.empty svg{width:36px;height:36px;opacity:.5}
+.empty.big{padding:80px 20px}
+.empty .btn{margin-top:6px}
+
+/* ---------- set page ---------- */
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-weight:600;font-size:14px;text-decoration:none;margin-top:20px;transition:.15s}
+.back:hover{color:var(--text)}
+.set-head{display:flex;gap:20px;align-items:flex-start;padding-top:12px;flex-wrap:wrap}
+.set-head-text{flex:1;min-width:230px}
+.set-head h1{font-size:clamp(22px,3vw,30px);font-weight:800}
+.set-head-text p{color:var(--muted);margin-top:5px}
+.set-head-meta{display:flex;gap:8px;color:var(--muted);font-size:13px;margin-top:9px;flex-wrap:wrap}
+.set-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mode-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0 6px}
+.mode-tile{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;text-decoration:none;color:var(--text);transition:.18s;box-shadow:var(--shadow);display:block}
+.mode-tile:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:var(--shadow-lg)}
+.mode-emoji{font-size:27px;line-height:1}
+.mode-tile h3{margin:10px 0 4px;font-size:15.5px;font-weight:700}
+.mode-tile p{color:var(--muted);font-size:12.5px;line-height:1.5}
+.mode-best{margin-top:11px;font-size:12px;font-weight:700;color:var(--primary)}
+.chips-row{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:7px;font:600 13px 'Inter',sans-serif;padding:8px 14px;border-radius:99px;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:.15s}
+.chip svg{width:15px;height:15px}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.on{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.card-list{margin-top:10px}
+.card-list-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.card-list-head h2{font-size:18px}
+.card-row-view{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:14px 10px;border-bottom:1px solid var(--border);border-radius:10px;transition:.15s}
+.card-row-view:hover{background:var(--surface2)}
+.card-row-view .row-num{width:24px;color:var(--muted);font-size:12.5px;font-weight:700;flex-shrink:0}
+.cr-term{font-weight:600;flex:1 1 30%;min-width:120px}
+.cr-def{color:var(--muted);flex:1 1 40%;min-width:140px}
+.card-row-view .icon-btn{width:34px;height:34px}
+.cr-star.on{color:#E8A800}
+[data-theme="dark"] .cr-star.on{color:var(--accent)}
+.card-row-view.is-starred{background:linear-gradient(90deg,rgba(255,205,31,.1),transparent 60%)}
+
+/* ---------- editor ---------- */
+.edit-head{display:flex;gap:18px;margin:18px 0 20px;align-items:flex-start;flex-wrap:wrap}
+.emoji-wrap{position:relative}
+.emoji-big{font-size:38px;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;width:72px;height:72px;cursor:pointer;box-shadow:var(--shadow);transition:.15s}
+.emoji-big:hover{border-color:var(--primary);transform:scale(1.04)}
+.emoji-pop{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:10px;width:238px;max-height:190px;overflow:auto}
+.emoji-opt{font-size:21px;background:none;border:none;border-radius:8px;padding:5px;cursor:pointer}
+.emoji-opt:hover{background:var(--surface2)}
+.edit-fields{flex:1;min-width:250px;display:flex;flex-direction:column;gap:10px}
+.card-row{display:grid;grid-template-columns:26px 1fr 1fr 38px;gap:10px;align-items:center;margin-bottom:10px;animation:slideUp .25s both}
+.row-num{color:var(--muted);font-size:13px;font-weight:700;text-align:center}
+.row-del:hover{color:var(--danger);background:rgba(255,90,95,.1)}
+.edit-actions{display:flex;gap:10px;align-items:center;margin:20px 0 40px;flex-wrap:wrap}
+.flex-spacer{flex:1}
+
+/* ---------- study common ---------- */
+.study-top{display:flex;align-items:center;gap:12px;padding:18px 0 0;position:relative;flex-wrap:wrap}
+.study-top .back{margin-top:0}
+.study-center{position:absolute;left:50%;transform:translateX(-50%);font-weight:700;font-size:14.5px;color:var(--muted)}
+.study-tools{margin-left:auto;display:flex;gap:4px;align-items:center}
+.study-hint{text-align:center;color:var(--muted);font-size:12.5px;margin-top:16px}
+.progress{height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;max-width:780px;margin:16px auto 0}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--primary),#8A5CFF);border-radius:99px;transition:width .35s}
+.done-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:70px 20px 40px;gap:8px;animation:pop .3s}
+.done-emoji{font-size:58px;line-height:1}
+.done-wrap h2{font-size:26px;margin-top:6px}
+.done-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;justify-content:center}
+
+<style>
+/* ---------- flashcards ---------- */
+.fc-stage{perspective:1600px;max-width:780px;margin:22px auto 0;cursor:pointer}
+.fc-card{position:relative;width:100%;height:min(48vh,400px);transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.7,.3,1)}
+.fc-card.flipped{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--surface);border:1.5px solid var(--border);border-radius:22px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 28px 52px;text-align:center;gap:14px;overflow:auto}
+.fc-face.fc-back{transform:rotateY(180deg);background:linear-gradient(135deg,var(--primary),#8A5CFF);border-color:transparent;color:#fff}
+.fc-label{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--muted)}
+.fc-back .fc-label{color:rgba(255,255,255,.75)}
+.fc-text{font-size:clamp(21px,3.4vw,32px);font-weight:700;max-width:640px;overflow-wrap:break-word}
+.fc-speak{position:absolute;bottom:14px;right:14px;width:38px;height:38px;border-radius:10px;border:none;background:var(--surface2);color:var(--muted);display:grid;place-items:center;cursor:pointer;transition:.15s}
+.fc-speak:hover{color:var(--primary);transform:scale(1.08)}
+.fc-speak svg{width:18px;height:18px}
+.fc-back .fc-speak{background:rgba(255,255,255,.18);color:#fff}
+.fc-nav{display:flex;gap:10px;justify-content:center;max-width:780px;margin:20px auto 0}
+.fc-nav .btn{flex:1;max-width:200px}
+
+/* ---------- learn / test questions ---------- */
+.q-wrap{max-width:660px;margin:28px auto 0}
+.q-kind{text-align:center;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-weight:800;color:var(--muted)}
+.q-term{text-align:center;font-size:clamp(22px,4vw,31px);font-weight:800;margin:8px 0 24px}
+.q-statement{text-align:center;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px 20px;font-size:17px;font-weight:600;margin:-12px 0 22px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:15px 18px;border-radius:13px;border:1.5px solid var(--border);background:var(--surface);font:500 15px 'Inter',sans-serif;color:var(--text);cursor:pointer;transition:.15s}
+.opt-btn:hover:not(:disabled){border-color:var(--primary);transform:translateX(2px)}
+.opt-btn:disabled{cursor:default}
+.opt-btn.correct{border-color:var(--success);background:rgba(0,179,76,.12);font-weight:700}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(255,90,95,.12);animation:shake .4s}
+.opt-num{width:24px;height:24px;border-radius:7px;background:var(--surface2);color:var(--muted);display:grid;place-items:center;font-size:12px;font-weight:800;flex-shrink:0}
+.opt-btn.correct .opt-num{background:var(--success);color:#fff}
+.opt-btn.wrong .opt-num{background:var(--danger);color:#fff}
+.written-row{display:flex;gap:10px}
+.written-row .input{flex:1}
+.w-feedback{text-align:center;margin-top:14px;font-weight:700;min-height:24px}
+.w-feedback.ok{color:var(--success)} .w-feedback.no{color:var(--danger)}
+
+/* ---------- test ---------- */
+.test-config{max-width:560px;margin:30px auto;background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
+.test-config h2{font-size:20px;margin-bottom:4px}
+.test-config .muted{font-size:14px}
+.cfg-row{margin:20px 0}
+.cfg-lab{font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14.5px}
+.cfg-lab output{color:var(--primary);font-weight:800}
+.cfg-checks{display:flex;flex-direction:column;gap:11px;background:var(--surface2);border-radius:12px;padding:14px 16px}
+.cfg-checks .check.disabled{opacity:.45;cursor:not-allowed}
+.q-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:22px;margin:14px 0;box-shadow:var(--shadow)}
+.q-card.right{border-color:var(--success)}
+.q-card.wrong{border-color:var(--danger)}
+.q-head{display:flex;gap:9px;align-items:center;margin-bottom:12px}
+.q-num{width:24px;height:24px;border-radius:8px;background:var(--surface2);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--muted)}
+.q-kind-badge{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;background:var(--primary-soft);color:var(--primary);padding:4px 10px;border-radius:99px}
+.q-body-term{font-size:19px;font-weight:800;margin-bottom:14px}
+.tf-row{display:flex;gap:10px}
+.tf-row .btn{flex:1;max-width:220px}
+.tf-row .btn.sel-opt{border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.q-card .opt-btn.sel-opt{border-color:var(--primary);background:var(--primary-soft)}
+.q-verdict{margin-top:14px;padding:11px 14px;border-radius:11px;font-size:13.5px;font-weight:600;line-height:1.5}
+.q-verdict.ok{background:rgba(0,179,76,.12);color:var(--success)}
+.q-verdict.no{background:rgba(255,90,95,.1);color:var(--danger)}
+.test-submit{position:sticky;bottom:16px;display:flex;justify-content:center;margin:22px 0 8px;z-index:5}
+.test-submit .btn{box-shadow:var(--shadow-lg);min-width:220px;height:48px}
+.result-banner{text-align:center;padding:30px 22px;border-radius:20px;background:linear-gradient(135deg,var(--primary-soft),rgba(138,92,255,.14));margin:22px 0 6px;animation:pop .3s}
+.result-banner .rb-emoji{font-size:46px}
+.result-banner h2{margin:8px 0 4px;font-size:23px}
+.result-banner p{color:var(--muted);font-weight:600}
+.result-banner .score-big{font-size:42px;font-weight:900;color:var(--primary);margin-top:6px}
+
+/* ---------- match ---------- */
+.match-bar{display:flex;align-items:center;gap:10px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+.match-bar .pill{font-size:13px;padding:7px 14px}
+.match-grid{display:grid;gap:12px;max-width:860px;margin:14px auto}
+.tile{min-height:96px;padding:12px 14px;background:var(--surface);border:2px solid var(--border);border-radius:14px;font:600 14px 'Inter',sans-serif;color:var(--text);display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;transition:.15s;user-select:none;line-height:1.35;word-break:break-word}
+.tile:hover{border-color:var(--primary);transform:translateY(-2px)}
+.tile.sel{border-color:var(--primary);background:var(--primary-soft);color:var(--primary);transform:scale(1.02)}
+.tile.done{opacity:.15;pointer-events:none;border-color:var(--success)}
+.tile.bad{animation:shake .4s;border-color:var(--danger)}
+.m-done{text-align:center;padding:50px 20px;animation:pop .3s}
+.m-done .done-emoji{font-size:56px}
+.m-done h2{font-size:26px;margin:10px 0 4px}
+.m-time-big{font-size:40px;font-weight:900;color:var(--primary)}
+.new-record{display:inline-block;background:rgba(255,205,31,.2);color:#B8860B;font-weight:800;font-size:12.5px;padding:5px 12px;border-radius:99px;margin-top:8px}
+[data-theme="dark"] .new-record{color:var(--accent)}
+
+/* ---------- modal / toast ---------- */
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,12,20,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;animation:fade .2s;padding:18px}
+.modal{background:var(--surface);border-radius:20px;padding:26px;max-width:460px;width:100%;box-shadow:var(--shadow-lg);animation:pop .25s;max-height:88vh;overflow:auto;border:1px solid var(--border)}
+.modal.wide{max-width:660px}
+.modal-title{font-size:19px;margin-bottom:6px}
+.modal-hint{color:var(--muted);font-size:13.5px;margin:6px 0 14px;line-height:1.55}
+.modal-hint.dim{margin:14px 0 0;font-size:12.5px;opacity:.8}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.modal-actions.spread{justify-content:space-between;align-items:center}
+.modal-text{color:var(--muted);font-size:14.5px;line-height:1.6}
+.share-row{display:flex;gap:10px}
+.share-row .input{flex:1;font-size:13px;color:var(--muted)}
+.share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.share-actions .btn{flex:1;min-width:130px}
+.file-btn{position:relative;overflow:hidden;cursor:pointer}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.bulk-ta{width:100%;min-height:150px;font-size:13.5px}
+.bulk-opts{display:flex;gap:16px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.bulk-count{min-height:20px;font-size:13px;font-weight:600;color:var(--primary)}
+.menu-list{display:flex;flex-direction:column;gap:2px;margin:-6px}
+.kbd-grid{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.kbd-row{display:flex;align-items:center;gap:12px;font-size:14px}
+.kbd{display:inline-block;min-width:64px;text-align:center;background:var(--surface2);border:1px solid var(--border);border-bottom-width:2.5px;border-radius:7px;font:700 12px ui-monospace,monospace;padding:4px 8px;color:var(--text)}
+.import-preview{text-align:center;padding:6px 0 2px}
+#toast-root{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:300;align-items:center;pointer-events:none;width:max-content;max-width:92vw}
+.toast{background:#282E3E;color:#fff;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow-lg);opacity:0;transform:translateY(14px);transition:.3s;font-weight:600;font-size:14px;max-width:92vw;text-align:center}
+[data-theme="dark"] .toast{background:#2E3548}
+.toast.show{opacity:1;transform:none}
+.toast.success{background:var(--success);color:#fff}
+.toast.error{background:var(--danger);color:#fff}
+
+/* ---------- auth ---------- */
+.auth-wrap{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:28px 16px}
+.auth-card{width:100%;max-width:430px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:36px 32px;box-shadow:var(--shadow-lg);text-align:center;animation:pop .3s}
+.auth-logo{width:58px;height:58px;margin:0 auto 16px;border-radius:17px;background:linear-gradient(135deg,#4255FF,#8A5CFF);color:#fff;font-size:27px;font-weight:800;display:grid;place-items:center;box-shadow:0 10px 24px rgba(66,85,255,.4)}
+.auth-card h1{font-size:23px;margin:0 0 6px}
+.auth-sub{color:var(--muted);font-size:14px;margin:0 0 22px}
+#auth-form{display:flex;flex-direction:column;gap:10px;text-align:left;margin-top:2px}
+.auth-err{color:var(--danger);font-size:13px;font-weight:600;text-align:left}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:11px;margin:18px 0 14px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.linklike{background:none;border:none;color:var(--primary);font:600 14px 'Inter',sans-serif;cursor:pointer;padding:9px;width:100%}
+.linklike:hover{text-decoration:underline}
+.linklike.strong{font-weight:800}
+.auth-note{font-size:12.5px;color:var(--muted);margin-top:16px;line-height:1.5}
+.auth-note.warn{color:var(--warn);font-weight:600}
+.g-logo{width:18px;height:18px}
+
+/* ---------- animations & responsive ---------- */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:scale(.94)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+@media(max-width:760px){
+  .mode-grid{grid-template-columns:repeat(2,1fr)}
+  .match-grid{grid-template-columns:repeat(3,1fr)!important}
+  .hero{flex-direction:column;align-items:flex-start}
+  .study-center{position:static;transform:none;margin-left:auto}
+  .study-top{row-gap:8px}
+  .set-head-actions{width:100%;margin-left:0}
+  .edit-head{flex-direction:column}
+  .stat-row{width:100%}
+  .stat{flex:1;justify-content:center}
+  .card-row-view{padding:12px 6px}
+  .card-row-view .icon-btn{width:32px;height:32px}
+  .container{padding:0 16px 60px}
+}
+@media(max-width:560px){
+  .card-row-view{display:grid;grid-template-columns:1fr auto auto;grid-template-areas:"num term term" "num def def" "num acts acts"}
+  .card-row-view .row-num{grid-area:num;align-self:start;margin-top:3px}
+  .cr-term{grid-area:term;flex:none}
+  .cr-def{grid-area:def;flex:none}
+  .card-row-view .icon-btn{grid-area:acts}
+  .card-row-view .icon-btn+.icon-btn{grid-area:acts;justify-self:end;margin-left:76px}
+  .match-grid{grid-template-columns:repeat(2,1fr)!important}
+  .tile{min-height:74px;font-size:13px}
+  .fc-nav .btn{max-width:none}
+  .modal{padding:20px}
+  .profile-name{display:none}
+  .profile-chip{padding:4px}
+}
+</style>
+</head>
+<body>
+<div id="splash"><div class="splash-badge">C</div><div class="splash-name">Cardly</div><div class="spinner"></div></div>
+<header id="topbar"></header>
+<main id="app" class="container"></main>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script type="module">
+/* ============================================================
+   Firebase — using the project config provided by the owner.
+   Loads Auth + Firestore via the modular CDN SDK. If the network
+   or CDN is unavailable, Cardly falls back to local guest mode.
+   ============================================================ */
+window.$auth = null;
+window.$db = null;
+(async () => {
+  try {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getAnalytics, isSupported } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js');
+    const authMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    let dbMod = null;
+    try { dbMod = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'); } catch (e) {}
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD2NxZd_pjbKWxfdEGou0CEz4AXj77cITc",
+      authDomain: "cardly-9bfbf.firebaseapp.com",
+      projectId: "cardly-9bfbf",
+      storageBucket: "cardly-9bfbf.firebasestorage.app",
+      messagingSenderId: "237598072369",
+      appId: "1:237598072369:web:34b06008c6cb40f44ebf10",
+      measurementId: "G-3GFRQCCGTZ"
+    };
+    const app = initializeApp(firebaseConfig);
+    try { isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {}); } catch (e) {}
+
+    const auth = authMod.getAuth(app);
+    window.$auth = {
+      auth,
+      onAuthStateChanged: cb => authMod.onAuthStateChanged(auth, cb),
+      signInGoogle: () => authMod.signInWithPopup(auth, new authMod.GoogleAuthProvider()),
+      signInEmail: (e, p) => authMod.signInWithEmailAndPassword(auth, e, p),
+      signUpEmail: (e, p) => authMod.createUserWithEmailAndPassword(auth, e, p),
+      updateProfile: (u, d) => authMod.updateProfile(u, d),
+      signOut: () => authMod.signOut(auth)
+    };
+    function withTimeout(p, ms) {
+      return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+    }
+    if (dbMod) {
+      try {
+        const db = dbMod.getFirestore(app);
+        window.$db = {
+          db,
+          doc: dbMod.doc, setDoc: dbMod.setDoc, getDoc: dbMod.getDoc, serverTimestamp: dbMod.serverTimestamp,
+          withTimeout
+        };
+      } catch (e) { window.$db = null; }
+    }
+  } catch (err) {
+    console.warn('Cardly: Firebase unavailable — local guest mode.', err);
+  } finally {
+    window.$authReady = true;
+    document.dispatchEvent(new CustomEvent('auth-ready'));
+  }
+})();
+</script>
+
+<script type="module">
+/* ============================================================
+   Cardly app — core (state, storage, helpers)
+   ============================================================ */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+function shuffle(arr){ const a = [...arr]; for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function sample(arr, n){ return shuffle(arr).slice(0, clamp(n, 0, arr.length)); }
+const dedupe = arr => [...new Set(arr)];
+function fmtClock(ms){ const t = ms / 1000; if (t < 60) return t.toFixed(1) + 's'; const m = Math.floor(t / 60), s = Math.round(t % 60); return m + ':' + String(s).padStart(2, '0'); }
+function timeAgo(ts){ if (!ts) return ''; const d = Date.now() - ts; if (d < 60e3) return 'just now'; if (d < 3600e3) return Math.floor(d / 60e3) + 'm ago'; if (d < 86400e3) return Math.floor(d / 3600e3) + 'h ago'; if (d < 7 * 86400e3) return Math.floor(d / 86400e3) + 'd ago'; return new Date(ts).toLocaleDateString(); }
+function greeting(){ const h = new Date().getHours(); return h < 5 ? 'Night owl session' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; }
+function firstName(){ return (user.name || '').split(' ')[0] || 'there'; }
+function slug(t){ return String(t || 'set').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'set'; }
+function normalize(s){ return String(s ?? '').toLowerCase().replace(/\(.*?\)/g, ' ').replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim(); }
+function lev(a, b){ const m = a.length, n = b.length; if (!m) return n; if (!n) return m; let prev = Array.from({length: n + 1}, (_, i) => i); for (let i = 1; i <= m; i++){ const cur = [i]; for (let j = 1; j <= n; j++){ cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); } prev = cur; } return prev[n]; }
+function checkWritten(input, expected){ const a = normalize(input), b = normalize(expected); if (!a) return false; if (a === b) return true; const tol = b.length >= 12 ? 2 : b.length >= 6 ? 1 : 0; return lev(a, b) <= tol; }
+async function copyText(t){ try { await navigator.clipboard.writeText(t); return true; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok; } catch (e2) { return false; } } }
+function download(name, text, type = 'application/json'){ const blob = new Blob([text], {type}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); }
+
+/* ---------- icons ---------- */
+const I = (p, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ${extra}>${p}</svg>`;
+const ICON = {
+  layers: I('<rect x="3" y="8" width="14" height="12" rx="2"/><path d="M7 8V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/>'),
+  sun: I('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
+  moon: I('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>'),
+  search: I('<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>'),
+  share: I('<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="m16 6-4-4-4 4"/><path d="M12 2v13"/>'),
+  star: I('<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>'),
+  starFill: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>`,
+  volume: I('<path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>'),
+  shuffle: I('<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/>'),
+  edit: I('<path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>'),
+  trash: I('<path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'),
+  copy: I('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
+  download: I('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>'),
+  upload: I('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>'),
+  x: I('<path d="M18 6 6 18M6 6l12 12"/>'),
+  check: I('<path d="M20 6 9 17l-5-5"/>'),
+  chevL: I('<path d="m15 18-6-6 6-6"/>'),
+  chevR: I('<path d="m9 18 6-6-6-6"/>'),
+  dots: I('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
+  flame: I('<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>'),
+  help: I('<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
+  out: I('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>'),
+  user: I('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),
+  clock: I('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'),
+  play: I('<path d="m6 4 14 8-14 8z"/>'),
+  pause: I('<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>'),
+  refresh: I('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),
+  target: I('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
+  cloud: I('<path d="M17.5 19a4.5 4.5 0 1 0-.9-8.9 6 6 0 1 0-10.3 5.4"/><path d="M8 19h9.5"/>'),
+  cloudOff: I('<path d="M2 2l20 20"/><path d="M9.5 5.2A6 6 0 0 1 18 8.6a4.5 4.5 0 0 1 2.2 6.9"/><path d="M17.5 19H8a5 5 0 0 1-1.9-9.6"/>'),
+  keyboard: I('<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/>'),
+  book: I('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>')
+};
+const EMOJIS = ['📘','🧠','🔬','🌍','🧮','🎨','🏛️','⚕️','💻','🎵','⚗️','🦴','⚖️','📖','🗣️','🗺️','✏️','🚀','⚡','🇪🇸','🇫🇷','🇩🇪','🧪','📐','🏆'];
+
+/* ---------- auth user + per-account local store ---------- */
+const user = { uid: null, name: null, email: null, photo: null };
+const space = () => user.uid || 'guest';
+const store = {
+  get(k, d){ try { const v = localStorage.getItem('cardly:' + space() + ':' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v){ try { localStorage.setItem('cardly:' + space() + ':' + k, JSON.stringify(v)); } catch (e) { toast('Storage is full — export a backup and remove old sets', 'error'); } }
+};
+let sets = [];
+let prefs = { shuffle: false, autoSpeak: false, starredOnly: false };
+let entered = false;
+let keyHandler = null;
+let oneOffCards = null;
+const intervals = [], timeouts = [];
+function addInterval(fn, ms){ const id = setInterval(fn, ms); intervals.push(id); return id; }
+function addTimeout(fn, ms){ const id = setTimeout(fn, ms); timeouts.push(id); return id; }
+function clearTimers(){ intervals.forEach(id => clearInterval(id)); timeouts.forEach(id => clearTimeout(id)); intervals.length = 0; timeouts.length = 0; }
+function savePrefs(){ store.set('prefs', prefs); }
+
+function demoSets(){
+  const mk = (emoji, title, description, pairs) => ({ id: uid(), emoji, title, description, createdAt: Date.now(), updatedAt: Date.now(), stats: {}, cards: pairs.map(([term, def]) => ({ id: uid(), term, def, starred: false })) });
+  return [
+    mk('🇪🇸', 'Spanish Basics', 'First words in Spanish — greetings, animals and everyday nouns.', [['hola','hello'],['gracias','thank you'],['por favor','please'],['agua','water'],['gato','cat'],['perro','dog'],['libro','book'],['casa','house']]),
+    mk('🔬', 'Biology: Cell Structure', 'The organelles every intro-bio quiz asks about.', [['Nucleus','Controls the cell and stores DNA'],['Mitochondria','Produces energy (ATP) through respiration'],['Ribosome','Builds proteins'],['Cell membrane','Controls what enters and leaves the cell'],['Chloroplast','Captures light energy for photosynthesis'],['Cytoplasm','Jelly-like fluid where reactions happen'],['Vacuole','Stores water and nutrients'],['Golgi apparatus','Packages and ships proteins']]),
+    mk('🌍', 'World Capitals', 'How many capitals do you actually know?', [['France','Paris'],['Japan','Tokyo'],['Canada','Ottawa'],['Brazil','Brasília'],['Egypt','Cairo'],['Australia','Canberra'],['Kenya','Nairobi'],['Norway','Oslo']])
+  ];
+}
+function loadSets(){ const saved = store.get('sets', null); if (Array.isArray(saved) && saved.length >= 0 && saved !== null) { sets = saved; } else { sets = demoSets(); saveSets(); } }
+function saveSets(){ store.set('sets', sets); pushToCloud(); }
+function findSet(id){ return sets.find(s => s.id === id); }
+function studyCards(set){ let c = [...set.cards]; if (prefs.starredOnly && c.some(x => x.starred)) c = c.filter(x => x.starred); return c; }
+function recordStudy(set, patch){ set.stats = set.stats || {}; Object.assign(set.stats, patch); set.stats.lastStudied = Date.now(); set.stats.times = (set.stats.times || 0) + 1; set.updatedAt = Date.now(); saveSets(); }
+function getStreak(){ return store.get('streak', { count: 0, best: 0, last: null }); }
+function touchStreak(){
+  const d = new Date().toLocaleDateString('en-CA');
+  const st = getStreak();
+  if (st.last === d) return st;
+  const y = new Date(Date.now() - 864e5).toLocaleDateString('en-CA');
+  st.count = (st.last === y) ? st.count + 1 : 1;
+  st.last = d; st.best = Math.max(st.best || 0, st.count);
+  store.set('streak', st); return st;
+}
+
+/* ---------- cloud sync (Firestore, optional & fully guarded) ---------- */
+let cloudState = 'off'; // off | ok | setup | error
+let pushTimer = null;
+async function cloudRef(){
+  if (!window.$db || !user.uid) return null;
+  const { db, doc } = window.$db;
+  return doc(db, 'users', user.uid);
+}
+async function pushToCloud(){
+  if (!window.$db || !user.uid || cloudState === 'setup') return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(async () => {
+    try {
+      const ref = await cloudRef(); if (!ref) return;
+      const { setDoc, withTimeout, serverTimestamp } = window.$db;
+      await withTimeout(setDoc(ref, { sets, updatedAt: serverTimestamp() }, { merge: true }), 12000);
+      cloudState = 'ok'; renderSyncPill();
+    } catch (e) {
+      const code = e && e.code;
+      if (code === 'permission-denied' || code === 'not-found' || code === 'failed-precondition') { cloudState = 'setup'; }
+      else { cloudState = 'error'; }
+      renderSyncPill();
+    }
+  }, 900);
+}
+async function pullFromCloud(){
+  if (!window.$db || !user.uid) return null;
+  try {
+    const ref = await cloudRef(); if (!ref) return null;
+    const { getDoc, withTimeout } = window.$db;
+    const snap = await withTimeout(getDoc(ref), 12000);
+    if (snap.exists()) return snap.data() || null;
+    cloudState = 'ok'; renderSyncPill(); return null;
+  } catch (e) {
+    const code = e && e.code;
+    if (code === 'permission-denied' || code === 'not-found' || code === 'failed-precondition') cloudState = 'setup';
+    else cloudState = 'error';
+    renderSyncPill();
+    return null;
+  }
+}
+async function syncOnSignIn(){
+  if (!window.$db || !user.uid) return;
+  const local = sets;
+  const cloud = await pullFromCloud();
+  if (!cloud || !Array.isArray(cloud.sets)) { if (local.length) pushToCloud(); return; }
+  const byId = {};
+  cloud.sets.forEach(s => { byId[s.id] = s; });
+  local.forEach(s => {
+    const c = byId[s.id];
+    if (!c || (s.updatedAt || 0) > (c.updatedAt || 0)) byId[s.id] = s;
+  });
+  sets = Object.values(byId).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  saveSets();
+}
+function renderSyncPill(){
+  const el = $('#sync-pill'); if (!el) return;
+  if (!user.uid) { el.outerHTML = ''; return; }
+  const map = { ok: ['ok', ICON.cloud, 'Cloud synced'], setup: ['bad', ICON.cloudOff, 'Setup needed'], error: ['bad', ICON.cloudOff, 'Local only'], off: ['', ICON.cloudOff, 'Local only'] };
+  const [cls, ico, label] = map[cloudState] || map.off;
+  el.className = 'sync-pill ' + cls;
+  el.innerHTML = ico + '<span>' + label + '</span>';
+  el.title = cls === 'setup' ? 'Enable Cloud Firestore in your Firebase console (see setup guide)' : 'Set sync status';
+}
+function openSetupGuide(){
+  const rules = `rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{uid} {\n      allow read, write: if request.auth != null && request.auth.uid == uid;\n    }\n  }\n}`;
+  const m = openModal(`<h3 class="modal-title">🌩️ Enable cloud sync (2 minutes)</h3>
+    <p class="modal-hint">Cardly already saves everything on this device. To also <b>sync sets across devices and accounts</b>, turn on Cloud Firestore in your Firebase project:</p>
+    <ol class="setup-steps"><li>Open <b>console.firebase.google.com</b> → your <b>cardly-9bfbf</b> project</li><li>Left menu → <b>Build → Firestore Database</b> → <b>Create database</b> → choose a location → Start</li><li>Tab <b>Rules</b> → replace everything with the rules below → <b>Publish</b></li></ol>
+    <textarea class="input bulk-ta" id="rules-ta" rows="8" readonly>${esc(rules)}</textarea>
+    <div class="modal-actions"><button class="btn ghost" data-x>Close</button><button class="btn primary" id="copy-rules">${ICON.copy}<span>Copy rules</span></button></div>`, { wide: true });
+  $('#copy-rules', m).onclick = async () => { const ok = await copyText(rules); toast(ok ? 'Rules copied — paste them in the Firebase Rules tab' : 'Copy failed — select the text manually', ok ? 'success' : 'error'); };
+}
+
+/* ---------- toast / modal ---------- */
+function toast(msg, type = 'info'){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  $('#toast-root').appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 350); }, 2800);
+}
+function openModal(html, opts = {}){
+  const root = $('#modal-root');
+  root.innerHTML = `<div class="modal-backdrop"><div class="modal ${opts.wide ? 'wide' : ''}">${html}</div></div>`;
+  const bd = root.firstElementChild, m = bd.firstElementChild;
+  bd.addEventListener('mousedown', e => { if (e.target === bd) closeModal(); });
+  m.addEventListener('click', e => { if (e.target.closest('[data-x]')) closeModal(); });
+  document.body.classList.add('no-scroll');
+  return m;
+}
+function closeModal(){ $('#modal-root').innerHTML = ''; document.body.classList.remove('no-scroll'); }
+function confirmDialog({ title, message, okLabel = 'Delete', danger = true }){
+  return new Promise(res => {
+    const m = openModal(`<h3 class="modal-title">${esc(title)}</h3><p class="modal-text">${esc(message)}</p>
+      <div class="modal-actions"><button class="btn ghost" id="cf-no">Cancel</button><button class="btn ${danger ? 'danger' : 'primary'}" id="cf-ok">${esc(okLabel)}</button></div>`);
+    $('#cf-no', m).onclick = () => { closeModal(); res(false); };
+    $('#cf-ok', m).onclick = () => { closeModal(); res(true); };
+  });
+}
+
+/* ---------- tts ---------- */
+function speak(text){
+  if (!text || !('speechSynthesis' in window)) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text.slice(0, 300)); u.rate = 1; speechSynthesis.speak(u); } catch (e) {}
+}
+
+/* ---------- share encode / import parse ---------- */
+function encodeSet(set){
+  const payload = { v: 1, t: set.title, d: set.description || '', e: set.emoji || '📘', c: set.cards.map(c => [c.term, c.def]) };
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  let bin = ''; bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function decodeSet(code){
+  let s = String(code).trim();
+  if (s.includes('#import=')) s = s.split('#import=')[1];
+  s = s.replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  const bin = atob(s);
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+function normalizeOne(s){
+  return { id: uid(), title: String(s.title || 'Untitled set').slice(0, 120), description: String(s.description || '').slice(0, 300), emoji: s.emoji || '📘', createdAt: Date.now(), updatedAt: Date.now(), stats: {},
+    cards: (s.cards || []).filter(c => String(c.term ?? '').trim() || String(c.def ?? '').trim()).map(c => ({ id: uid(), term: String(c.term ?? ''), def: String(c.def ?? ''), starred: !!c.starred })) };
+}
+function normalizeImport(j){
+  if (j && j.cardly && Array.isArray(j.sets)) return j.sets.map(normalizeOne);
+  if (Array.isArray(j)) return j.map(normalizeOne);
+  if (j && j.v === 1 && Array.isArray(j.c)) return [normalizeOne({ title: j.t, description: j.d, emoji: j.e, cards: j.c.map(([term, def]) => ({ term, def })) })];
+  if (j && Array.isArray(j.cards)) return [normalizeOne(j)];
+  throw new Error('Unrecognized format');
+}
+function parseImportText(text){
+  const raw = String(text || '').trim();
+  if (!raw) throw new Error('Nothing to import — paste a link or JSON first');
+  try { return normalizeImport(JSON.parse(raw)); } catch (e) {}
+  if (raw.includes('#import=') || /^[A-Za-z0-9_-]+$/.test(raw)) { try { return normalizeImport(decodeSet(raw)); } catch (e) {} }
+  const cards = parseBulk(raw, 'auto', false);
+  if (cards.length) return [normalizeOne({ title: 'Imported set', description: '', emoji: '📥', cards })];
+  throw new Error('Could not read that — paste a Cardly share link or JSON');
+}
+function parseBulk(text, sep = 'auto', flip = false){
+  const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const out = [];
+  for (const line of lines){
+    let parts = null;
+    const useSep = sep === 'auto'
+      ? (line.includes('\t') ? 'tab' : /\s+[-–—]\s+/.test(line) ? 'dash' : line.includes(':') ? 'colon' : line.includes(',') ? 'comma' : 'none')
+      : sep;
+    if (useSep === 'tab') parts = line.split('\t');
+    else if (useSep === 'dash') parts = line.split(/\s+[-–—]\s+/);
+    else if (useSep === 'colon'){ const i = line.indexOf(':'); if (i > 0) parts = [line.slice(0, i), line.slice(i + 1)]; }
+    else if (useSep === 'comma') parts = line.split(',');
+    if (!parts || parts.length < 2 || !parts[0].trim() || !parts.slice(1).join('').trim()){ out.push({ term: line, def: '' }); continue; }
+    const term = parts[0].trim(), def = parts.slice(1).join(' — ').trim();
+    out.push(flip ? { term: def, def: term } : { term, def });
+  }
+  return out;
+}
+
+
+/* ============================================================
+   Cardly app — header, auth screen, home, editor
+   ============================================================ */
+function setTheme(t){ document.documentElement.dataset.theme = t; try { localStorage.setItem('cardly:theme', t); } catch (e) {} const b = $('#theme-btn'); if (b) b.innerHTML = t === 'dark' ? ICON.sun : ICON.moon; }
+
+function renderHeader(){
+  const tb = $('#topbar');
+  const theme = document.documentElement.dataset.theme;
+  tb.innerHTML = `
+    <a class="logo" href="#home"><span class="logo-badge">${ICON.layers}</span><span class="logo-word">Cardly</span></a>
+    <div class="top-actions">
+      <span class="sync-pill" id="sync-pill" style="display:none"></span>
+      <button class="icon-btn" id="help-btn" title="Keyboard shortcuts (?)" aria-label="Shortcuts">${ICON.keyboard}</button>
+      <button class="icon-btn" id="theme-btn" title="Toggle dark mode (Ctrl+J)" aria-label="Toggle theme">${theme === 'dark' ? ICON.sun : ICON.moon}</button>
+      ${entered ? profileChip() : ''}
+    </div>`;
+  $('#theme-btn').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  $('#help-btn').onclick = openShortcuts;
+  const pc = $('#profile-chip'); if (pc) pc.onclick = toggleProfileMenu;
+  const sc = $('#signin-cta'); if (sc) sc.onclick = () => { entered = false; renderLogin(); };
+  renderSyncPill();
+}
+function profileChip(){
+  if (user.uid){
+    const initial = (user.name || user.email || '?').trim()[0].toUpperCase();
+    return `<div class="profile-wrap">
+      <button class="profile-chip" id="profile-chip">${user.photo ? `<img class="avatar" src="${esc(user.photo)}" alt="" referrerpolicy="no-referrer">` : `<span class="avatar ai">${esc(initial)}</span>`}<span class="profile-name">${esc((user.name || 'Account').split(' ')[0])}</span></button>
+      <div id="profile-menu-slot"></div>
+    </div>`;
+  }
+  return `<button class="btn sm primary" id="signin-cta">Sign in</button>`;
+}
+function toggleProfileMenu(){
+  const slot = $('#profile-menu-slot'); if (!slot) return;
+  if (slot.firstElementChild){ slot.innerHTML = ''; return; }
+  const guest = !user.uid;
+  slot.innerHTML = `<div class="dropdown">
+    <div class="dd-head">${guest ? `<b>Guest</b><span class="muted sm">Local mode — this device only</span>` : `<b>${esc(user.name || 'Learner')}</b><span class="muted sm">${esc(user.email || '')}</span>`}</div>
+    <button class="dd-item" id="dd-export">${ICON.download}<span>Export backup (.json)</span></button>
+    <button class="dd-item" id="dd-import">${ICON.upload}<span>Import backup</span></button>
+    ${user.uid ? `<button class="dd-item" id="dd-setup">${ICON.cloud}<span>Cloud sync setup</span></button>` : ''}
+    <button class="dd-item" id="dd-kbd">${ICON.keyboard}<span>Keyboard shortcuts</span></button>
+    <div class="dd-sep"></div>
+    ${guest ? `<button class="dd-item" id="dd-signin">${ICON.user}<span>Sign in / create account</span></button>` : `<button class="dd-item danger" id="dd-out">${ICON.out}<span>Sign out</span></button>`}
+  </div>`;
+  $('#dd-export', slot).onclick = () => { slot.innerHTML = ''; download('cardly-backup.json', JSON.stringify({ cardly: 1, exported: new Date().toISOString(), sets }, null, 2)); toast('Backup downloaded 📦', 'success'); };
+  $('#dd-import', slot).onclick = () => { slot.innerHTML = ''; openImportModal(); };
+  const su = $('#dd-setup', slot); if (su) su.onclick = () => { slot.innerHTML = ''; openSetupGuide(); };
+  $('#dd-kbd', slot).onclick = () => { slot.innerHTML = ''; openShortcuts(); };
+  const si = $('#dd-signin', slot); if (si) si.onclick = () => { slot.innerHTML = ''; try { localStorage.setItem('cardly:guest', '0'); } catch (e) {} entered = false; renderLogin(); };
+  const so = $('#dd-out', slot); if (so) so.onclick = () => { slot.innerHTML = ''; signOutFlow(); };
+}
+async function signOutFlow(){
+  try { localStorage.setItem('cardly:guest', '0'); } catch (e) {}
+  if (window.$auth && user.uid){ try { await window.$auth.signOut(); } catch (e) {} }
+  user.uid = null; user.name = null; user.email = null; user.photo = null;
+  entered = false; renderLogin();
+}
+document.addEventListener('click', e => {
+  const slot = $('#profile-menu-slot');
+  if (slot && slot.firstElementChild && !e.target.closest('.profile-wrap')) slot.innerHTML = '';
+  const pop = $('#emoji-pop');
+  if (pop && pop.style.display !== 'none' && !e.target.closest('.emoji-wrap')) pop.style.display = 'none';
+});
+
+function openShortcuts(){
+  openModal(`<h3 class="modal-title">⌨️ Keyboard shortcuts</h3><div class="kbd-grid">
+    ${[['Space', 'Flip flashcard'], ['← / →', 'Previous / next card'], ['1 – 4', 'Answer a question'], ['S', 'Star current card'], ['P', 'Pronounce card'], ['/', 'Search sets'], ['N', 'New set'], ['Ctrl + J', 'Toggle dark mode'], ['Esc', 'Close dialogs'], ['?', 'This panel']].map(([k, v]) => `<div class="kbd-row"><span class="kbd">${k}</span><span>${v}</span></div>`).join('')}
+  </div><div class="modal-actions"><button class="btn primary" data-x>Got it</button></div>`);
+}
+
+/* ---------- auth screen ---------- */
+function prettyAuthErr(e){
+  const code = (e && e.code) || '';
+  const map = {
+    'auth/invalid-email': 'That email address doesn\u2019t look right.',
+    'auth/missing-password': 'Enter your password.',
+    'auth/wrong-password': 'Wrong email or password.',
+    'auth/invalid-credential': 'Wrong email or password.',
+    'auth/user-not-found': 'No account with that email — create one below.',
+    'auth/email-already-in-use': 'That email already has an account — sign in instead.',
+    'auth/weak-password': 'Password must be at least 6 characters.',
+    'auth/too-many-requests': 'Too many attempts — wait a minute and retry.',
+    'auth/popup-blocked': 'Your browser blocked the popup — allow popups and retry.',
+    'auth/popup-closed-by-request': '',
+    'auth/cancelled-popup-request': '',
+    'auth/unauthorized-domain': 'Google sign-in can\u2019t run from this address. Open Cardly from localhost or an https host (e.g. Netlify), then add that domain in Firebase Console → Authentication → Settings → Authorized domains.',
+    'auth/operation-not-allowed': 'Enable this sign-in method in Firebase Console → Authentication → Sign-in method.',
+    'auth/network-request-failed': 'Network error — check your connection.'
+  };
+  return map[code] !== undefined ? map[code] : ((e && e.message) || 'Something went wrong.').replace('Firebase: ', '');
+}
+function renderLogin(){
+  document.title = 'Cardly — Sign in';
+  const off = !window.$auth;
+  $('#app').innerHTML = `
+  <div class="auth-wrap"><div class="auth-card">
+    <div class="auth-logo">C</div>
+    <h1>Welcome to Cardly</h1>
+    <p class="auth-sub">Flashcards, adaptive learning, practice tests & match — your sets, everywhere.</p>
+    <button class="btn google block" id="g-btn" ${off ? 'disabled' : ''}>
+      <svg class="g-logo" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      Continue with Google
+    </button>
+    <div class="divider"><span>or with email</span></div>
+    <form id="auth-form" ${off ? 'style="opacity:.45;pointer-events:none"' : ''}>
+      <input class="input" id="a-name" placeholder="Your name" autocomplete="name" style="display:none">
+      <input class="input" id="a-email" type="email" placeholder="Email" autocomplete="email" required>
+      <input class="input" id="a-pass" type="password" placeholder="Password (min 6 characters)" autocomplete="current-password" required minlength="6">
+      <div class="auth-err" id="a-err"></div>
+      <button class="btn primary block" id="a-submit" type="submit">Sign in</button>
+    </form>
+    <button class="linklike" id="a-toggle" ${off ? 'disabled style="opacity:.45"' : ''}>New to Cardly? Create an account</button>
+    <button class="linklike strong" id="a-guest">Continue as guest — no account needed →</button>
+    ${off
+      ? '<p class="auth-note warn">⚠️ Firebase couldn\u2019t load (offline?). You can still use Cardly as a guest — all data stays on this device.</p>'
+      : '<p class="auth-note">Guest data stays on this device. Signing in also unlocks optional cloud sync across your devices.</p>'}
+  </div></div>`;
+  let mode = 'in';
+  const nameIn = $('#a-name'), submit = $('#a-submit'), err = $('#a-err'), form = $('#auth-form'), pass = $('#a-pass');
+  $('#a-toggle').onclick = () => {
+    mode = mode === 'in' ? 'up' : 'in';
+    nameIn.style.display = mode === 'up' ? 'block' : 'none';
+    submit.textContent = mode === 'up' ? 'Create account' : 'Sign in';
+    $('#a-toggle').textContent = mode === 'up' ? 'Already have an account? Sign in' : 'New to Cardly? Create an account';
+    pass.autocomplete = mode === 'up' ? 'new-password' : 'current-password';
+    err.textContent = '';
+  };
+  form.onsubmit = async ev => {
+    ev.preventDefault(); if (!window.$auth) return;
+    err.textContent = '';
+    submit.disabled = true; submit.textContent = mode === 'up' ? 'Creating…' : 'Signing in…';
+    const email = $('#a-email').value.trim(), pw = pass.value;
+    try {
+      if (mode === 'up'){
+        const cred = await window.$auth.signUpEmail(email, pw);
+        const nm = nameIn.value.trim();
+        if (nm) { try { await window.$auth.updateProfile(cred.user, { displayName: nm }); user.name = nm; } catch (e) {} }
+      } else {
+        await window.$auth.signInEmail(email, pw);
+      }
+    } catch (e2) { err.textContent = prettyAuthErr(e2) || 'Please try again.'; }
+    submit.disabled = false; submit.textContent = mode === 'up' ? 'Create account' : 'Sign in';
+  };
+  $('#g-btn').onclick = async () => {
+    if (!window.$auth) return;
+    err.textContent = '';
+    try { await window.$auth.signInGoogle(); } catch (e) { const msg = prettyAuthErr(e); if (msg) err.textContent = msg; }
+  };
+  $('#a-guest').onclick = () => { try { localStorage.setItem('cardly:guest', '1'); } catch (e) {} enterApp(); };
+}
+
+/* ---------- router ---------- */
+function route(){
+  clearTimers(); keyHandler = null;
+  try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
+  closeModal();
+  const h = location.hash.replace(/^#/, '');
+  const seg = h.split('/').map(x => decodeURIComponent(x));
+  const page = seg[0] || 'home';
+  if (page === '' || page === 'home' || page.startsWith('import')) renderHome();
+  else if (page === 'set' && seg[1]) renderSet(seg[1]);
+  else if (page === 'edit') renderEditor(seg[1] || 'new');
+  else if (page === 'study' && seg[1] && seg[2]) renderStudy(seg[1], seg[2]);
+  else if (page === 'login') renderLogin();
+  else location.hash = '#home';
+  checkImportHash();
+}
+
+/* ---------- home ---------- */
+function renderHome(){
+  document.title = 'Cardly — Your sets';
+  const st = getStreak();
+  const totals = sets.reduce((a, s) => { a.cards += s.cards.length; a.starred += s.cards.filter(c => c.starred).length; return a; }, { cards: 0, starred: 0 });
+  $('#app').innerHTML = `
+  <section class="hero">
+    <div class="hero-text">
+      <h1>${greeting()}, <span class="accent-underline">${esc(firstName())}</span></h1>
+      <p>${totals.cards ? `You have <b>${totals.cards}</b> cards across <b>${sets.length}</b> set${sets.length === 1 ? '' : 's'}. Ready when you are.` : 'Create your first set to get started — it takes 30 seconds.'}</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><span class="stat-ico flame-ico">${ICON.flame}</span><div><b>${st.count || 0}</b><span class="stat-lab">day streak</span></div></div>
+      <div class="stat"><span class="stat-ico">${ICON.layers}</span><div><b>${sets.length}</b><span class="stat-lab">sets</span></div></div>
+      <div class="stat"><span class="stat-ico">${ICON.star}</span><div><b>${totals.starred}</b><span class="stat-lab">starred</span></div></div>
+    </div>
+  </section>
+  <div class="toolbar">
+    <div class="search-box">${ICON.search}<input id="search" type="search" placeholder="Search sets and cards…  (press /)" autocomplete="off"></div>
+    <div class="toolbar-btns">
+      <button class="btn outline" id="import-btn">${ICON.upload}<span>Import</span></button>
+      <button class="btn primary" id="new-set-btn">${ICON.plus}<span>New set</span></button>
+    </div>
+  </div>
+  <div class="set-grid" id="set-grid"></div>`;
+  $('#new-set-btn').onclick = () => { location.hash = '#edit/new'; };
+  $('#import-btn').onclick = openImportModal;
+  $('#search').addEventListener('input', () => renderSetGrid($('#search').value.trim().toLowerCase()));
+  renderSetGrid('');
+  keyHandler = e => {
+    if (e.key === '/'){ e.preventDefault(); $('#search').focus(); }
+    else if (e.key.toLowerCase() === 'n'){ location.hash = '#edit/new'; }
+  };
+}
+function renderSetGrid(filter){
+  const grid = $('#set-grid'); if (!grid) return;
+  const q = (filter || '').toLowerCase();
+  const list = sets.filter(s => !q || s.title.toLowerCase().includes(q) || (s.description || '').toLowerCase().includes(q) || s.cards.some(c => c.term.toLowerCase().includes(q)));
+  list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  if (!list.length){
+    grid.innerHTML = q
+      ? `<div class="empty" style="grid-column:1/-1">${ICON.search}<p>No sets match “${esc(filter)}”.</p></div>`
+      : `<div class="empty" style="grid-column:1/-1">${ICON.layers}<p><b>No sets yet.</b></p><p>Create one, or paste your notes with bulk import.</p><button class="btn primary" id="empty-new">${ICON.plus}<span>Create your first set</span></button></div>`;
+    const b = $('#empty-new'); if (b) b.onclick = () => { location.hash = '#edit/new'; };
+    return;
+  }
+  grid.innerHTML = list.map(setCardHTML).join('');
+  $$('.set-card', grid).forEach(card => {
+    card.onclick = e => { if (e.target.closest('.dots')) return; location.hash = '#set/' + card.dataset.id; };
+  });
+  $$('.dots', grid).forEach(btn => { btn.onclick = e => { e.stopPropagation(); openSetMenu(btn.dataset.id); }; });
+}
+function setCardHTML(s){
+  const n = s.cards.length, starred = s.cards.filter(c => c.starred).length;
+  const last = s.stats && s.stats.lastStudied;
+  const badges = [];
+  if (s.stats && s.stats.testBest != null) badges.push(`<span class="pill">📝 best ${s.stats.testBest}%</span>`);
+  if (s.stats && s.stats.matchBest != null) badges.push(`<span class="pill">🎮 ${fmtClock(s.stats.matchBest)}</span>`);
+  if (s.stats && s.stats.learnBest != null) badges.push(`<span class="pill">🧠 ${s.stats.learnBest}%</span>`);
+  return `<div class="set-card" data-id="${s.id}" role="link" tabindex="0">
+    <div class="set-card-top"><span class="set-emoji">${esc(s.emoji || '📘')}</span><button class="icon-btn dots" data-id="${s.id}" title="Options">${ICON.dots}</button></div>
+    <h3>${esc(s.title)}</h3>
+    ${s.description ? `<p class="set-desc">${esc(s.description)}</p>` : ''}
+    <div class="set-card-meta"><span>${n} card${n === 1 ? '' : 's'}</span>${starred ? `<span>·</span><span>★ ${starred}</span>` : ''}${last ? `<span>·</span><span>${timeAgo(last)}</span>` : ''}</div>
+    ${badges.length ? `<div class="set-badges">${badges.join('')}</div>` : ''}
+  </div>`;
+}
+function openSetMenu(id){
+  const s = findSet(id); if (!s) return;
+  const m = openModal(`<div class="menu-list">
+    <button class="dd-item" data-act="study">${ICON.play}<span>Study this set</span></button>
+    <button class="dd-item" data-act="edit">${ICON.edit}<span>Edit</span></button>
+    <button class="dd-item" data-act="share">${ICON.share}<span>Share…</span></button>
+    <button class="dd-item" data-act="dup">${ICON.copy}<span>Duplicate</span></button>
+    <button class="dd-item" data-act="export">${ICON.download}<span>Export .json</span></button>
+    <div class="dd-sep"></div>
+    <button class="dd-item danger" data-act="del">${ICON.trash}<span>Delete set</span></button>
+  </div>`);
+  m.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act; closeModal();
+    if (act === 'study') location.hash = '#study/' + id + '/flashcards';
+    else if (act === 'edit') location.hash = '#edit/' + id;
+    else if (act === 'share') openShareModal(s);
+    else if (act === 'dup'){
+      const c = JSON.parse(JSON.stringify(s));
+      c.id = uid(); c.title = s.title + ' (copy)'; c.cards.forEach(cd => cd.id = uid()); c.createdAt = c.updatedAt = Date.now(); c.stats = {};
+      sets.unshift(c); saveSets(); toast('Set duplicated ✌️', 'success'); route();
+    }
+    else if (act === 'export') download(slug(s.title) + '.json', JSON.stringify({ v: 1, t: s.title, d: s.description || '', e: s.emoji, c: s.cards.map(x => [x.term, x.def]) }, null, 2));
+    else if (act === 'del') deleteSetFlow(s);
+  });
+}
+async function deleteSetFlow(s){
+  const ok = await confirmDialog({ title: `Delete “${s.title}”?`, message: `This removes the set and its ${s.cards.length} cards from this device. This can\u2019t be undone.`, okLabel: 'Delete' });
+  if (!ok) return;
+  sets = sets.filter(x => x.id !== s.id);
+  saveSets(); toast('Set deleted', 'success');
+  if (location.hash.startsWith('#set/' + s.id) || location.hash.startsWith('#edit/' + s.id) || location.hash.startsWith('#study/' + s.id)) location.hash = '#home';
+  else route();
+}
+
+/* ---------- editor ---------- */
+function renderEditor(id){
+  const isNew = !id || id === 'new';
+  const set = isNew ? { id: null, title: '', description: '', emoji: '📘', cards: [{ term: '', def: '' }, { term: '', def: '' }] } : findSet(id);
+  if (!set){ location.hash = '#home'; return; }
+  document.title = (isNew ? 'New set' : 'Edit — ' + set.title) + ' — Cardly';
+  $('#app').innerHTML = `
+    <a class="back" href="${isNew ? '#home' : '#set/' + set.id}">← Back</a>
+    <div class="edit-head">
+      <div class="emoji-wrap">
+        <button class="emoji-big" id="emoji-btn" title="Pick an icon">${esc(set.emoji || '📘')}</button>
+        <div class="dropdown emoji-pop" id="emoji-pop" style="display:none">${EMOJIS.map(e => `<button type="button" class="emoji-opt" data-e="${e}">${e}</button>`).join('')}</div>
+      </div>
+      <div class="edit-fields">
+        <input class="input input-lg" id="et-title" placeholder="Enter a title, like “Biology — Chapter 4”" value="${esc(set.title)}" maxlength="120">
+        <input class="input" id="et-desc" placeholder="Add a description (optional)" value="${esc(set.description || '')}" maxlength="300">
+      </div>
+    </div>
+    <div id="cards-edit"></div>
+    <div class="edit-actions">
+      <button class="btn outline" id="add-card-btn">${ICON.plus}<span>Add card</span></button>
+      <button class="btn outline" id="bulk-btn">${ICON.copy}<span>Paste import</span></button>
+      <span class="flex-spacer"></span>
+      <span class="muted sm" id="card-count-label"></span>
+      <button class="btn primary" id="save-btn">${ICON.check}<span>Save set</span></button>
+    </div>`;
+  const rowsEl = () => $('#cards-edit');
+  function renumber(){
+    $$('#cards-edit .card-row').forEach((r, i) => r.querySelector('.row-num').textContent = i + 1);
+    const vis = $$('#cards-edit .card-row').length;
+    $('#card-count-label').textContent = vis + ' card' + (vis === 1 ? '' : 's');
+  }
+  function addRow(term = '', def = '', focus = false){
+    const div = document.createElement('div');
+    div.className = 'card-row';
+    div.innerHTML = `<span class="row-num"></span>
+      <input class="input r-term" placeholder="Term" value="${esc(term)}" maxlength="300">
+      <input class="input r-def" placeholder="Definition" value="${esc(def)}" maxlength="500">
+      <button class="icon-btn row-del" title="Remove card">${ICON.trash}</button>`;
+    div.querySelector('.row-del').onclick = () => {
+      if (rowsEl().children.length > 1){ div.remove(); renumber(); }
+      else { div.querySelector('.r-term').value = ''; div.querySelector('.r-def').value = ''; }
+    };
+    div.querySelector('.r-def').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); addRow(); } });
+    rowsEl().appendChild(div); renumber();
+    if (focus) div.querySelector('.r-term').focus();
+  }
+  set.cards.forEach(c => addRow(c.term, c.def));
+  $('#add-card-btn').onclick = () => addRow();
+  $('#bulk-btn').onclick = () => openBulkModal(cards => {
+    $$('#cards-edit .card-row').forEach(r => {
+      if (!r.querySelector('.r-term').value.trim() && !r.querySelector('.r-def').value.trim()) r.remove();
+    });
+    cards.forEach(c => addRow(c.term, c.def));
+    toast('Added ' + cards.length + ' cards ✨', 'success');
+  });
+  $('#emoji-btn').onclick = () => {
+    const pop = $('#emoji-pop');
+    pop.style.display = pop.style.display === 'none' ? 'grid' : 'none';
+  };
+  $$('#emoji-pop .emoji-opt').forEach(b => b.onclick = () => { $('#emoji-btn').textContent = b.dataset.e; $('#emoji-pop').style.display = 'none'; });
+  $('#save-btn').onclick = () => {
+    const title = $('#et-title').value.trim();
+    const cards = $$('#cards-edit .card-row').map(r => ({ term: r.querySelector('.r-term').value.trim(), def: r.querySelector('.r-def').value.trim() })).filter(c => c.term || c.def);
+    if (!title){ toast('Give your set a title first', 'error'); $('#et-title').focus(); return; }
+    if (!cards.length){ toast('Add at least one card', 'error'); return; }
+    if (isNew){
+      const s = { id: uid(), title, description: $('#et-desc').value.trim(), emoji: $('#emoji-btn').textContent || '📘', createdAt: Date.now(), updatedAt: Date.now(), stats: {}, cards: cards.map(c => ({ id: uid(), ...c, starred: false })) };
+      sets.unshift(s); saveSets(); touchStreak();
+      location.hash = '#set/' + s.id; toast('Set created 🎉', 'success');
+    } else {
+      set.title = title; set.description = $('#et-desc').value.trim(); set.emoji = $('#emoji-btn').textContent || '📘';
+      set.cards = cards.map((c, i) => ({ id: (set.cards[i] && set.cards[i].id) || uid(), ...c, starred: (set.cards[i] && set.cards[i].starred) || false }));
+      set.updatedAt = Date.now(); saveSets();
+      location.hash = '#set/' + set.id; toast('Saved ✓', 'success');
+    }
+  };
+  keyHandler = e => { if ((e.ctrlKey || e.metaKey) && e.key === 's'){ e.preventDefault(); $('#save-btn').click(); } };
+  if (isNew) $('#et-title').focus();
+}
+function openBulkModal(onInsert){
+  const m = openModal(`<h3 class="modal-title">📋 Paste your cards</h3>
+    <p class="modal-hint">One card per line. Separate term and definition with <b>Tab</b>, <b>“ - ”</b>, <b>“: ”</b> or <b>“,”</b> — or let Cardly auto-detect it.</p>
+    <textarea class="input bulk-ta" id="bulk-ta" placeholder="hola - hello&#10;gato - cat&#10;perro - dog"></textarea>
+    <div class="bulk-opts">
+      <label class="check"><input type="checkbox" id="bulk-flip"> Swap columns (definition first)</label>
+      <select class="input" id="bulk-sep">
+        <option value="auto">Auto-detect separator</option>
+        <option value="tab">Tab</option>
+        <option value="dash">“ - ” dash</option>
+        <option value="colon">“: ” colon</option>
+        <option value="comma">Comma</option>
+      </select>
+    </div>
+    <div class="bulk-count" id="bulk-count"></div>
+    <div class="modal-actions"><button class="btn ghost" data-x>Cancel</button><button class="btn primary" id="bulk-add">Add cards</button></div>`, { wide: true });
+  const ta = $('#bulk-ta', m);
+  const current = () => parseBulk(ta.value, $('#bulk-sep', m).value, $('#bulk-flip', m).checked);
+  const update = () => { const cards = current(); $('#bulk-count', m).textContent = cards.length ? 'Will add ' + cards.length + ' card' + (cards.length === 1 ? '' : 's') + '.' : ''; };
+  ta.addEventListener('input', update);
+  $('#bulk-sep', m).onchange = update; $('#bulk-flip', m).onchange = update;
+  $('#bulk-add', m).onclick = () => {
+    const cards = current().filter(c => c.term && c.def);
+    if (!cards.length){ toast('Add at least one full line (term + definition)', 'error'); return; }
+    closeModal(); onInsert(cards);
+  };
+  setTimeout(() => ta.focus(), 60);
+}
+
+
+/* ============================================================
+   Cardly app — set page, flashcards, learn
+   ============================================================ */
+function renderSet(id){
+  const set = findSet(id); if (!set){ location.hash = '#home'; return; }
+  document.title = set.title + ' — Cardly';
+  const n = set.cards.length, starred = set.cards.filter(c => c.starred).length;
+  const stats = set.stats || {};
+  const modeTile = (mode, emoji, title, desc, best) => `
+    <a class="mode-tile" href="#study/${set.id}/${mode}">
+      <span class="mode-emoji">${emoji}</span>
+      <h3>${title}</h3><p>${desc}</p>
+      ${best ? `<div class="mode-best">${best}</div>` : ''}
+    </a>`;
+  $('#app').innerHTML = `
+    <a class="back" href="#home">← All sets</a>
+    <section class="set-head">
+      <span class="set-emoji xl">${esc(set.emoji || '📘')}</span>
+      <div class="set-head-text">
+        <h1>${esc(set.title)}</h1>
+        ${set.description ? `<p>${esc(set.description)}</p>` : ''}
+        <div class="set-head-meta">
+          <span>${n} card${n === 1 ? '' : 's'}</span>
+          ${starred ? `<span>·</span><span>★ ${starred} starred</span>` : ''}
+          ${stats.lastStudied ? `<span>·</span><span>studied ${timeAgo(stats.lastStudied)}</span>` : ''}
+          ${stats.times ? `<span>·</span><span>${stats.times} session${stats.times === 1 ? '' : 's'}</span>` : ''}
+        </div>
+      </div>
+      <div class="set-head-actions">
+        <button class="btn outline sm" id="share-btn">${ICON.share}<span>Share</span></button>
+        <button class="btn outline sm" id="edit-btn">${ICON.edit}<span>Edit</span></button>
+        <button class="icon-btn" id="more-btn" title="More">${ICON.dots}</button>
+      </div>
+    </section>
+    <div class="mode-grid">
+      ${modeTile('flashcards', '🃏', 'Flashcards', 'Flip through every card at your own pace.')}
+      ${modeTile('learn', '🧠', 'Learn', 'Adaptive rounds that repeat whatever you miss.', stats.learnBest != null ? 'Best accuracy ' + stats.learnBest + '%' : '')}
+      ${modeTile('test', '📝', 'Practice test', 'A graded quiz — multiple choice, true/false & written.', stats.testBest != null ? 'Best score ' + stats.testBest + '%' : '')}
+      ${modeTile('match', '🎮', 'Match', 'Race the clock, pairing terms with their meanings.', stats.matchBest != null ? 'Best time ' + fmtClock(stats.matchBest) : '')}
+    </div>
+    <div class="chips-row">
+      <button class="chip ${prefs.shuffle ? 'on' : ''}" id="chip-shuffle">${ICON.shuffle} Shuffle cards</button>
+      <button class="chip ${prefs.autoSpeak ? 'on' : ''}" id="chip-tts">${ICON.volume} Read aloud</button>
+      ${starred ? `<button class="chip ${prefs.starredOnly ? 'on' : ''}" id="chip-star">${ICON.star} Starred only (${starred})</button>` : ''}
+    </div>
+    <section class="card-list">
+      <div class="card-list-head"><h2>Cards</h2><span class="muted sm">${n} total</span></div>
+      ${set.cards.map((c, i) => `
+        <div class="card-row-view ${c.starred ? 'is-starred' : ''}" data-cid="${c.id}">
+          <span class="row-num">${i + 1}</span>
+          <div class="cr-term">${esc(c.term)}</div>
+          <div class="cr-def">${esc(c.def)}</div>
+          <button class="icon-btn cr-star ${c.starred ? 'on' : ''}" data-star="${c.id}" title="${c.starred ? 'Unstar' : 'Star this card'}">${c.starred ? ICON.starFill : ICON.star}</button>
+          <button class="icon-btn cr-speak" data-say="${esc(c.term)}" title="Read term aloud">${ICON.volume}</button>
+        </div>`).join('')}
+    </section>`;
+  $('#share-btn').onclick = () => openShareModal(set);
+  $('#edit-btn').onclick = () => { location.hash = '#edit/' + set.id; };
+  $('#more-btn').onclick = () => openSetMenu(set.id);
+  const chip = (el, key) => { if (el) el.onclick = () => { prefs[key] = !prefs[key]; savePrefs(); route(); }; };
+  chip($('#chip-shuffle'), 'shuffle'); chip($('#chip-tts'), 'autoSpeak'); chip($('#chip-star'), 'starredOnly');
+  $$('.cr-star').forEach(b => b.onclick = () => {
+    const c = set.cards.find(x => x.id === b.dataset.star); if (!c) return;
+    c.starred = !c.starred; saveSets(); route();
+  });
+  $$('.cr-speak').forEach(b => b.onclick = () => speak(b.dataset.say));
+  keyHandler = e => {
+    const k = e.key.toLowerCase();
+    if (k === '1') location.hash = '#study/' + set.id + '/flashcards';
+    else if (k === '2') location.hash = '#study/' + set.id + '/learn';
+    else if (k === '3') location.hash = '#study/' + set.id + '/test';
+    else if (k === '4') location.hash = '#study/' + set.id + '/match';
+    else if (k === 'e') location.hash = '#edit/' + set.id;
+  };
+}
+
+/* ---------- flashcards ---------- */
+function flashcardsView(set){
+  let cards = oneOffCards ? oneOffCards : studyCards(set);
+  oneOffCards = null;
+  if (!cards.length){ location.hash = '#set/' + set.id; return; }
+  let order = prefs.shuffle ? shuffle(cards) : cards;
+  let i = 0, flipped = false, auto = false;
+  $('#app').innerHTML = `
+    <div class="study-top">
+      <a class="back" href="#set/${set.id}">← Exit</a>
+      <div class="study-center" id="fc-count"></div>
+      <div class="study-tools">
+        <button class="icon-btn" id="fc-shuffle" title="Shuffle cards">${ICON.shuffle}</button>
+        <button class="icon-btn" id="fc-auto" title="Auto-advance">▶</button>
+        <button class="icon-btn" id="fc-star" title="Star this card (S)"></button>
+      </div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="fc-prog"></div></div>
+    <div class="fc-stage" id="fc-stage">
+      <div class="fc-card" id="fc-card">
+        <div class="fc-face fc-front">
+          <div class="fc-label">TERM</div><div class="fc-text" id="fc-term"></div>
+          <button class="fc-speak" id="fc-speak-t" title="Read aloud">${ICON.volume}</button>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="fc-label">DEFINITION</div><div class="fc-text" id="fc-def"></div>
+          <button class="fc-speak" id="fc-speak-d" title="Read aloud">${ICON.volume}</button>
+        </div>
+      </div>
+    </div>
+    <div class="fc-nav">
+      <button class="btn outline" id="fc-prev">${ICON.chevL}<span>Prev</span></button>
+      <button class="btn primary" id="fc-flip">Flip&nbsp;<span class="sm" style="opacity:.75">(Space)</span></button>
+      <button class="btn outline" id="fc-next"><span>Next</span>${ICON.chevR}</button>
+    </div>
+    <p class="study-hint">← → move · Space flips · S stars · P pronounces</p>`;
+  const paint = () => {
+    const c = order[i]; if (!c) return;
+    $('#fc-term').textContent = c.term;
+    $('#fc-def').textContent = c.def;
+    $('#fc-count').textContent = (i + 1) + ' / ' + order.length;
+    $('#fc-prog').style.width = (((i + 1) / order.length) * 100) + '%';
+    const sb = $('#fc-star');
+    sb.innerHTML = c.starred ? ICON.starFill : ICON.star;
+    sb.classList.toggle('on', !!c.starred);
+    $('#fc-prev').disabled = i === 0;
+    if (prefs.autoSpeak && !flipped) speak(c.term);
+  };
+  const unflip = () => { flipped = false; $('#fc-card').classList.remove('flipped'); };
+  const flip = () => { flipped = !flipped; $('#fc-card').classList.toggle('flipped', flipped); if (flipped && prefs.autoSpeak) speak(order[i].def); };
+  const next = () => { if (i < order.length - 1){ i++; unflip(); paint(); } else finish(); };
+  const prev = () => { if (i > 0){ i--; unflip(); paint(); } };
+  const star = () => { const c = order[i]; c.starred = !c.starred; const orig = set.cards.find(x => x.id === c.id); if (orig) orig.starred = c.starred; saveSets(); paint(); };
+  const finish = () => {
+    clearTimers();
+    recordStudy(set, {});
+    $('#app').innerHTML = `<div class="done-wrap">
+      <div class="done-emoji">🎉</div>
+      <h2>Round complete!</h2>
+      <p class="muted">You went through ${order.length} card${order.length === 1 ? '' : 's'} — streak is now ${touchStreak().count} day${touchStreak().count === 1 ? '' : 's'} 🔥</p>
+      <div class="done-actions">
+        <button class="btn primary" id="dn-again">${ICON.refresh}<span>Go again</span></button>
+        <button class="btn outline" id="dn-shuf">${ICON.shuffle}<span>Shuffle & go again</span></button>
+        <a class="btn ghost" href="#set/${set.id}">Back to set</a>
+      </div></div>`;
+    $('#dn-again').onclick = () => flashcardsView(set);
+    $('#dn-shuf').onclick = () => { prefs.shuffle = true; savePrefs(); flashcardsView(set); };
+    keyHandler = null;
+  };
+  const setAuto = on => {
+    auto = on;
+    const b = $('#fc-auto'); if (!b) return;
+    b.innerHTML = on ? '⏸' : '▶';
+    b.classList.toggle('on', on);
+    if (on) addInterval(() => { if (!flipped) flip(); else next(); }, 2600);
+  };
+  $('#fc-stage').onclick = flip;
+  $('#fc-flip').onclick = flip;
+  $('#fc-prev').onclick = prev;
+  $('#fc-next').onclick = next;
+  $('#fc-shuffle').onclick = () => { order = shuffle(order); i = 0; unflip(); paint(); toast('Shuffled 🔀'); };
+  $('#fc-auto').onclick = () => setAuto(!auto);
+  $('#fc-star').onclick = star;
+  $('#fc-speak-t').onclick = e => { e.stopPropagation(); speak(order[i].term); };
+  $('#fc-speak-d').onclick = e => { e.stopPropagation(); speak(order[i].def); };
+  keyHandler = e => {
+    if (e.key === ' '){ e.preventDefault(); flip(); }
+    else if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
+    else if (e.key.toLowerCase() === 's') star();
+    else if (e.key.toLowerCase() === 'p') speak(order[i].term);
+  };
+  paint();
+}
+
+/* ---------- learn ---------- */
+function learnView(set){
+  const pool = shuffle(studyCards(set));
+  const total = pool.length;
+  if (!total){ location.hash = '#set/' + set.id; return; }
+  let done = 0, right = 0, wrong = 0;
+  $('#app').innerHTML = `
+    <div class="study-top">
+      <a class="back" href="#set/${set.id}">← Exit</a>
+      <div class="study-center" id="ln-count"></div>
+      <div class="study-tools"><span class="pill" id="ln-acc">Accuracy 100%</span></div>
+    </div>
+    <div class="progress"><div class="progress-fill" id="ln-prog"></div></div>
+    <div id="ln-body"></div>
+    <p class="study-hint">Press 1–4 to answer fast</p>`;
+  const body = $('#ln-body');
+  const paintMeta = () => {
+    $('#ln-count').textContent = done + ' / ' + total + ' learned';
+    $('#ln-prog').style.width = ((done / total) * 100) + '%';
+    const acc = (right + wrong) ? Math.round((right / (right + wrong)) * 100) : 100;
+    $('#ln-acc').textContent = 'Accuracy ' + acc + '%';
+  };
+  const finish = () => {
+    clearTimers();
+    const acc = (right + wrong) ? Math.round((right / (right + wrong)) * 100) : 100;
+    recordStudy(set, { learnBest: Math.max((set.stats && set.stats.learnBest) || 0, acc) });
+    const streak = touchStreak().count;
+    body.innerHTML = `<div class="done-wrap">
+      <div class="done-emoji">${wrong === 0 ? '🌟' : '🧠'}</div>
+      <h2>${wrong === 0 ? 'Perfect round!' : 'All learned!'}</h2>
+      <p class="muted">${total} card${total === 1 ? '' : 's'} mastered · ${acc}% accuracy · ${streak} day streak 🔥</p>
+      <div class="done-actions">
+        <button class="btn primary" id="ln-again">${ICON.refresh}<span>Another round</span></button>
+        <a class="btn outline" href="#study/${set.id}/test">Take a practice test</a>
+        <a class="btn ghost" href="#set/${set.id}">Back to set</a>
+      </div></div>`;
+    $('#ln-again').onclick = () => learnView(set);
+    keyHandler = null;
+  };
+  const step = () => {
+    if (!pool.length) return finish();
+    const c = pool[0];
+    const others = set.cards.filter(x => x.id !== c.id && x.def);
+    const opts = dedupe([c.def, ...sample(others.map(x => x.def), 3)].filter(Boolean));
+    if (opts.length < 2) return askWritten(c);
+    const arrangement = shuffle(opts);
+    body.innerHTML = `<div class="q-wrap">
+      <div class="q-kind">Pick the matching definition</div>
+      <h2 class="q-term">${esc(c.term)}</h2>
+      <div class="opts">${arrangement.map((o, idx) => `<button class="opt-btn" data-i="${idx}"><span class="opt-num">${idx + 1}</span>${esc(o)}</button>`).join('')}</div>
+    </div>`;
+    paintMeta();
+    $$('.opt-btn', body).forEach(b => b.onclick = () => answerMC(b, arrangement[+b.dataset.i] === c.def, c, arrangement.indexOf(c.def)));
+    keyHandler = e => {
+      const n = parseInt(e.key, 10);
+      if (n >= 1 && n <= arrangement.length){ const b = $$('.opt-btn', body)[n - 1]; if (b && !b.disabled) b.click(); }
+    };
+  };
+  const answerMC = (btn, ok, c, correctIdx) => {
+    $$('.opt-btn', body).forEach(b => b.disabled = true);
+    btn.classList.add(ok ? 'correct' : 'wrong');
+    if (!ok){ const cb = $$('.opt-btn', body)[correctIdx]; if (cb) cb.classList.add('correct'); }
+    if (ok){ right++; addTimeout(() => { pool.shift(); done++; paintMeta(); step(); }, 650); }
+    else { wrong++; addTimeout(() => { pool.push(pool.shift()); paintMeta(); step(); }, 1350); }
+  };
+  const askWritten = c => {
+    body.innerHTML = `<div class="q-wrap">
+      <div class="q-kind">Type the definition</div>
+      <h2 class="q-term">${esc(c.term)}</h2>
+      <div class="written-row"><input class="input" id="ln-w" placeholder="Type your answer…" autocomplete="off"><button class="btn primary" id="ln-check">Check</button></div>
+      <div class="w-feedback" id="ln-fb"></div>
+    </div>`;
+    paintMeta();
+    const inp = $('#ln-w'); inp.focus();
+    const check = () => {
+      const ok = checkWritten(inp.value, c.def);
+      const fb = $('#ln-fb');
+      fb.textContent = ok ? '✓ Correct!' : '✗ Not quite — the answer is: ' + c.def;
+      fb.className = 'w-feedback ' + (ok ? 'ok' : 'no');
+      $('#ln-check').disabled = true; inp.disabled = true;
+      if (ok){ right++; addTimeout(() => { pool.shift(); done++; paintMeta(); step(); }, 800); }
+      else { wrong++; addTimeout(() => { pool.push(pool.shift()); paintMeta(); step(); }, 1600); }
+    };
+    $('#ln-check').onclick = check;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+    keyHandler = null;
+  };
+  step();
+}
+
+
+/* ============================================================
+   Cardly app — practice test, match, share/import, init
+   ============================================================ */
+function buildTest(cards, cfg){
+  const types = [];
+  if (cfg.mc && cards.length > 1) types.push('mc');
+  if (cfg.tf && cards.length > 1) types.push('tf');
+  if (cfg.written) types.push('written');
+  if (!types.length) return [];
+  const chosen = shuffle(cards).slice(0, cfg.count);
+  return chosen.map((card, i) => makeQ(card, types[i % types.length], cards));
+}
+function makeQ(card, type, all){
+  const others = all.filter(c => c.id !== card.id);
+  if (type === 'mc' && others.length){
+    const opts = dedupe([card.def, ...sample(others.map(c => c.def), 3)].filter(Boolean));
+    if (opts.length > 1) return { type: 'mc', card, options: shuffle(opts), answer: card.def, given: null };
+  }
+  if (type === 'tf' && others.length){
+    const d = sample(others, 1)[0].def;
+    const shown = normalize(d) === normalize(card.def) ? card.def : d;
+    return { type: 'tf', card, shown, answerIsTrue: normalize(shown) === normalize(card.def), given: null };
+  }
+  return { type: 'written', card, answer: card.def, given: null };
+}
+function testView(set){
+  const cards = studyCards(set);
+  const maxQ = Math.min(20, cards.length);
+  const cfg = { count: Math.min(10, maxQ), mc: cards.length > 1, tf: cards.length > 1, written: true, instant: true };
+  renderConfig();
+  function renderConfig(){
+    $('#app').innerHTML = `
+      <a class="back" href="#set/${set.id}">← Back to set</a>
+      <div class="test-config">
+        <h2>📝 Practice test</h2>
+        <p class="muted">Cardly builds a fresh quiz from your ${cards.length} card${cards.length === 1 ? '' : 's'} every time.</p>
+        <div class="cfg-row">
+          <div class="cfg-lab"><span>Questions</span><output id="cfg-out">${cfg.count}</output></div>
+          <input type="range" id="cfg-count" min="1" max="${maxQ}" value="${cfg.count}" style="width:100%">
+        </div>
+        <div class="cfg-row">
+          <div class="cfg-lab"><span>Question types</span></div>
+          <div class="cfg-checks">
+            <label class="check ${cards.length > 1 ? '' : 'disabled'}"><input type="checkbox" id="cfg-mc" ${cfg.mc ? 'checked' : ''} ${cards.length > 1 ? '' : 'disabled'}> Multiple choice</label>
+            <label class="check ${cards.length > 1 ? '' : 'disabled'}"><input type="checkbox" id="cfg-tf" ${cfg.tf ? 'checked' : ''} ${cards.length > 1 ? '' : 'disabled'}> True / False</label>
+            <label class="check"><input type="checkbox" id="cfg-written" ${cfg.written ? 'checked' : ''}> Written (typo-tolerant grading)</label>
+          </div>
+        </div>
+        <div class="cfg-row">
+          <label class="check"><input type="checkbox" id="cfg-instant" ${cfg.instant ? 'checked' : ''}> Instant feedback while answering</label>
+        </div>
+        <button class="btn primary block" id="cfg-start" style="margin-top:8px">${ICON.play}<span>Start test</span></button>
+      </div>`;
+    $('#cfg-count').oninput = () => { cfg.count = +$('#cfg-count').value; $('#cfg-out').textContent = cfg.count; };
+    $('#cfg-mc').onchange = e => cfg.mc = e.target.checked;
+    $('#cfg-tf').onchange = e => cfg.tf = e.target.checked;
+    $('#cfg-written').onchange = e => cfg.written = e.target.checked;
+    $('#cfg-instant').onchange = e => cfg.instant = e.target.checked;
+    $('#cfg-start').onclick = () => {
+      const qs = buildTest(cards, cfg);
+      if (!qs.length){ toast('Pick at least one question type', 'error'); return; }
+      run(qs);
+    };
+  }
+  function run(qs){
+    let answered = 0;
+    $('#app').innerHTML = `
+      <div class="study-top">
+        <a class="back" href="#set/${set.id}">← Exit</a>
+        <div class="study-center">Practice test</div>
+        <div class="study-tools"><span class="pill" id="t-answered">0 / ${qs.length} answered</span></div>
+      </div>
+      <div id="t-body">
+        ${qs.map((q, qi) => qHTML(q, qi)).join('')}
+      </div>
+      <div class="test-submit"><button class="btn primary" id="t-submit">Submit test</button></div>`;
+    const markAnswered = () => { answered++; $('#t-answered').textContent = answered + ' / ' + qs.length + ' answered'; };
+    $$('.q-card', $('#t-body')).forEach(section => {
+      const qi = +section.dataset.qi, q = qs[qi];
+      if (q.type === 'mc'){
+        $$('.opt-btn', section).forEach(b => b.onclick = () => {
+          if (q.locked) return;
+          q.given = b.dataset.v;
+          if (cfg.instant){
+            q.locked = true;
+            $$('.opt-btn', section).forEach(x => { x.disabled = true; if (x.dataset.v === q.answer) x.classList.add('correct'); });
+            if (q.given !== q.answer) b.classList.add('wrong');
+            section.classList.add(q.given === q.answer ? 'right' : 'wrong');
+          } else {
+            $$('.opt-btn', section).forEach(x => x.classList.remove('sel-opt'));
+            b.classList.add('sel-opt');
+          }
+          markAnswered();
+        });
+      } else if (q.type === 'tf'){
+        $$('.tf-row .btn', section).forEach(b => b.onclick = () => {
+          if (q.locked) return;
+          q.given = b.dataset.v;
+          if (cfg.instant){
+            q.locked = true;
+            $$('.tf-row .btn', section).forEach(x => x.disabled = true);
+            b.classList.add(q.given === (q.answerIsTrue ? '1' : '0') ? 'sel-opt' : 'wrong');
+            section.classList.add(q.given === (q.answerIsTrue ? '1' : '0') ? 'right' : 'wrong');
+          } else {
+            $$('.tf-row .btn', section).forEach(x => x.classList.remove('sel-opt'));
+            b.classList.add('sel-opt');
+          }
+          markAnswered();
+        });
+      } else {
+        const inp = $('.w-input', section);
+        inp.addEventListener('input', () => { if (!q.locked) q.given = inp.value; });
+        const btn = $('.w-check', section);
+        if (btn) btn.onclick = () => {
+          if (q.locked) return;
+          q.locked = true; q.given = inp.value;
+          const ok = checkWritten(q.given || '', q.answer);
+          inp.disabled = true; btn.disabled = true;
+          inp.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+          const fb = $('.w-inline', section);
+          if (fb){ fb.textContent = ok ? '✓ Correct!' : '✗ Answer: ' + q.answer; fb.className = 'w-feedback w-inline ' + (ok ? 'ok' : 'no'); }
+          section.classList.add(ok ? 'right' : 'wrong');
+        };
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter' && btn) btn.click(); });
+      }
+    });
+    $('#t-submit').onclick = () => {
+      const unanswered = qs.filter(q => q.given == null || (q.type === 'written' && !(q.given || '').trim())).length;
+      if (unanswered && !confirmSkip(unanswered)) return;
+      grade(qs);
+    };
+    const confirmSkip = n => window.confirm(n + ' question' + (n === 1 ? '' : 's') + ' unanswered — submit anyway?');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function grade(qs){
+    let correct = 0; const missed = [];
+    qs.forEach(q => {
+      let ok = false;
+      if (q.type === 'written') ok = checkWritten(q.given || '', q.answer);
+      else if (q.type === 'tf') ok = String(q.given) === (q.answerIsTrue ? '1' : '0');
+      else ok = q.given === q.answer;
+      q.ok = ok;
+      if (ok) correct++; else missed.push(q.card);
+    });
+    const score = Math.round((correct / qs.length) * 100);
+    recordStudy(set, { testBest: Math.max(((set.stats && set.stats.testBest) != null) ? set.stats.testBest : -1, score) });
+    touchStreak();
+    renderReview(qs, score, correct, missed);
+  }
+  function renderReview(qs, score, correct, missed){
+    const uniqMissed = dedupe(missed.map(c => c.id)).map(id => missed.find(c => c.id === id));
+    const [emoji, msg] = score >= 90 ? ['🏆', 'Outstanding work!'] : score >= 75 ? ['🎉', 'Great job!'] : score >= 50 ? ['👍', 'Solid — keep going!'] : ['💪', 'Keep practicing, you\u2019ll get there!'];
+    $('#app').innerHTML = `
+      <a class="back" href="#set/${set.id}">← Back to set</a>
+      <div class="result-banner">
+        <div class="rb-emoji">${emoji}</div>
+        <h2>${msg}</h2>
+        <div class="score-big">${score}%</div>
+        <p>${correct} of ${qs.length} correct</p>
+      </div>
+      <div class="done-actions" style="padding-bottom:8px">
+        <button class="btn primary" id="r-retake">${ICON.refresh}<span>Retake</span></button>
+        <button class="btn outline" id="r-new">New test</button>
+        ${uniqMissed.length ? `<button class="btn yellow" id="r-missed">🃏 Study the ${uniqMissed.length} missed</button>` : ''}
+        <a class="btn ghost" href="#set/${set.id}">Back to set</a>
+      </div>
+      <h2 style="font-size:18px;margin:14px 0 2px">Review</h2>
+      ${qs.map((q, qi) => reviewHTML(q, qi)).join('')}`;
+    $('#r-retake').onclick = () => run(buildTest(cards, cfg));
+    $('#r-new').onclick = renderConfig;
+    const rm = $('#r-missed');
+    if (rm) rm.onclick = () => { oneOffCards = uniqMissed; location.hash = '#study/' + set.id + '/flashcards'; };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    keyHandler = null;
+  }
+  function reviewHTML(q, qi){
+    const cls = q.ok ? 'right' : 'wrong';
+    const givenText = q.type === 'tf' ? (String(q.given) === '1' ? 'True' : String(q.given) === '0' ? 'False' : '—') : (q.given == null || q.given === '' ? '—' : String(q.given));
+    const verdict = q.ok
+      ? `<div class="q-verdict ok">✓ Correct</div>`
+      : `<div class="q-verdict no">✗ Your answer: ${esc(givenText)} · Correct: ${esc(q.type === 'tf' ? (q.answerIsTrue ? 'True' : 'False') + ' — ' + q.card.def : q.answer)}</div>`;
+    let body = '';
+    if (q.type === 'mc'){
+      body = `<div class="q-body-term">${esc(q.card.term)}</div><div class="opts">${q.options.map(o => `<button class="opt-btn ${o === q.answer ? 'correct' : (o === q.given ? 'wrong' : '')}" disabled><span class="opt-num">${o === q.answer ? '✓' : o === q.given ? '✗' : ''}</span>${esc(o)}</button>`).join('')}</div>`;
+    } else if (q.type === 'tf'){
+      body = `<div class="q-body-term">${esc(q.card.term)} means…</div><div class="q-statement">${esc(q.shown)}</div><div class="tf-row"><button class="btn outline" disabled>True</button><button class="btn outline" disabled>False</button></div>`;
+    } else {
+      body = `<div class="q-body-term">${esc(q.card.term)}</div><div class="written-row"><input class="input" value="${esc(q.given || '')}" readonly placeholder="— no answer —"></div>`;
+    }
+    const kind = q.type === 'mc' ? 'Multiple choice' : q.type === 'tf' ? 'True / False' : 'Written';
+    return `<section class="q-card ${cls}"><div class="q-head"><span class="q-num">${qi + 1}</span><span class="q-kind-badge">${kind}</span></div>${body}${verdict}</section>`;
+  }
+  function qHTML(q, qi){
+    const kind = q.type === 'mc' ? 'Multiple choice' : q.type === 'tf' ? 'True / False' : 'Written';
+    let inner = '';
+    if (q.type === 'mc'){
+      inner = `<div class="q-body-term">${esc(q.card.term)}</div><div class="opts">${q.options.map(o => `<button class="opt-btn" data-v="${esc(o)}"><span class="opt-num"></span>${esc(o)}</button>`).join('')}</div>`;
+    } else if (q.type === 'tf'){
+      inner = `<div class="q-body-term">${esc(q.card.term)} means…</div><div class="q-statement">${esc(q.shown)}</div><div class="tf-row"><button class="btn outline" data-v="1">True</button><button class="btn outline" data-v="0">False</button></div>`;
+    } else {
+      inner = `<div class="q-body-term">${esc(q.card.term)}</div><div class="written-row"><input class="input w-input" placeholder="Type your answer…" autocomplete="off">${cfg.instant ? '<button class="btn primary w-check">Check</button>' : ''}</div>${cfg.instant ? '<div class="w-feedback w-inline"></div>' : ''}`;
+    }
+    return `<section class="q-card" data-qi="${qi}"><div class="q-head"><span class="q-num">${qi + 1}</span><span class="q-kind-badge">${kind}</span></div>${inner}</section>`;
+  }
+}
+
+/* ---------- match ---------- */
+function matchView(set){
+  const cards = studyCards(set);
+  if (cards.length < 2){ toast('Add at least 2 cards to play Match', 'error'); location.hash = '#set/' + set.id; return; }
+  let pairCount = Math.min(6, cards.length);
+  render();
+  function render(){
+    const chosen = sample(cards, pairCount);
+    const tiles = shuffle(chosen.flatMap(c => [{ cid: c.id, text: c.term }, { cid: c.id, text: c.def }]));
+    let sel = [], matches = 0, mistakes = 0, startTs = 0, locked = false, timerId = null;
+    const cols = pairCount > 6 ? 5 : 4;
+    $('#app').innerHTML = `
+      <div class="study-top">
+        <a class="back" href="#set/${set.id}">← Exit</a>
+        <div class="study-center" id="m-time">0.0s</div>
+        <div class="study-tools"><button class="icon-btn" id="m-restart" title="Restart">${ICON.refresh}</button></div>
+      </div>
+      <div class="match-bar">
+        <span class="pill" id="m-pairs">0 / ${pairCount} pairs</span>
+        <span class="pill" id="m-miss">0 misses</span>
+        ${cards.length >= 8 ? `<span class="chip on" style="pointer-events:none">${pairCount} pairs</span>` : ''}
+        ${cards.length >= 8 ? [8, 10].filter(x => x <= cards.length && x !== pairCount).map(x => `<button class="chip" data-size="${x}">${x} pairs</button>`).join('') : ''}
+      </div>
+      <div class="match-grid" style="grid-template-columns:repeat(${cols},1fr)">
+        ${tiles.map((t, i) => `<button class="tile" data-i="${i}">${esc(t.text)}</button>`).join('')}
+      </div>
+      <p class="study-hint">Click a term, then its matching definition. Find all ${pairCount} pairs as fast as you can!</p>`;
+    $$('.chip[data-size]').forEach(b => b.onclick = () => { pairCount = +b.dataset.size; render(); });
+    $('#m-restart').onclick = render;
+    $$('.tile').forEach(btn => btn.onclick = () => onTile(btn));
+    function onTile(btn){
+      const idx = +btn.dataset.i, t = tiles[idx];
+      if (locked || btn.classList.contains('done') || sel.some(s => s.btn === btn)) return;
+      if (!startTs){ startTs = Date.now(); timerId = addInterval(() => { const el = $('#m-time'); if (el) el.textContent = ((Date.now() - startTs) / 1000).toFixed(1) + 's'; }, 100); }
+      btn.classList.add('sel'); sel.push({ btn, t });
+      if (sel.length === 2){
+        locked = true;
+        const [a, b] = sel;
+        if (a.t.cid === b.t.cid){
+          addTimeout(() => {
+            a.btn.classList.remove('sel'); b.btn.classList.remove('sel');
+            a.btn.classList.add('done'); b.btn.classList.add('done');
+            matches++; $('#m-pairs').textContent = matches + ' / ' + pairCount + ' pairs';
+            sel = []; locked = false;
+            if (matches === pairCount) finish();
+          }, 260);
+        } else {
+          a.btn.classList.add('bad'); b.btn.classList.add('bad');
+          addTimeout(() => { a.btn.classList.remove('sel', 'bad'); b.btn.classList.remove('sel', 'bad'); sel = []; locked = false; }, 600);
+          mistakes++; $('#m-miss').textContent = mistakes + ' miss' + (mistakes === 1 ? '' : 'es');
+        }
+      }
+    }
+    function finish(){
+      if (timerId) clearInterval(timerId);
+      const ms = Date.now() - startTs;
+      const prevBest = set.stats && set.stats.matchBest;
+      recordStudy(set, { matchBest: (prevBest != null) ? Math.min(prevBest, ms) : ms });
+      const isRecord = prevBest == null || ms < prevBest;
+      $('#app').innerHTML = `<div class="m-done">
+        <div class="done-emoji">${isRecord ? '🏅' : '🎯'}</div>
+        <h2>All matched!</h2>
+        <div class="m-time-big">${fmtClock(ms)}</div>
+        ${mistakes ? `<p class="muted">${mistakes} miss${mistakes === 1 ? '' : 'es'}</p>` : '<p class="muted">Flawless — no misses!</p>'}
+        ${isRecord ? '<span class="new-record">⚡ New best time!</span>' : `<p class="muted sm">Best: ${fmtClock(set.stats.matchBest)}</p>`}
+        <div class="done-actions">
+          <button class="btn primary" id="m-again">${ICON.refresh}<span>Play again</span></button>
+          <a class="btn outline" href="#study/${set.id}/test">Take a test</a>
+          <a class="btn ghost" href="#set/${set.id}">Back to set</a>
+        </div></div>`;
+      touchStreak();
+      $('#m-again').onclick = render;
+      keyHandler = null;
+    }
+  }
+}
+
+/* ---------- share / import / print ---------- */
+function openShareModal(set){
+  const code = encodeSet(set);
+  const base = location.href.split('#')[0];
+  const link = base + '#import=' + code;
+  const canShare = !!navigator.share;
+  const m = openModal(`<h3 class="modal-title">Share “${esc(set.title)}”</h3>
+    <p class="modal-hint">Anyone who opens this link gets the whole set copied into their Cardly — no account needed.</p>
+    <div class="share-row"><input class="input" id="share-url" readonly value="${esc(link)}"><button class="btn primary" id="share-copy">${ICON.copy}<span>Copy</span></button></div>
+    <div class="share-actions">
+      ${canShare ? `<button class="btn outline" id="share-native">📤 Share…</button>` : ''}
+      <button class="btn outline" id="share-json">${ICON.download}<span>Export .json</span></button>
+      <button class="btn outline" id="share-print">🖨️ Print</button>
+    </div>
+    <p class="modal-hint dim">Tip: the link contains the set itself, so very large sets make long URLs. For files, use Export.</p>`, { wide: true });
+  $('#share-copy', m).onclick = async () => { const ok = await copyText(link); toast(ok ? 'Link copied — send it to anyone 🚀' : 'Copy failed — select the text manually', ok ? 'success' : 'error'); };
+  const nat = $('#share-native', m);
+  if (nat) nat.onclick = () => navigator.share({ title: set.title, text: 'Study my “' + set.title + '” set on Cardly!', url: link }).catch(() => {});
+  $('#share-json', m).onclick = () => download(slug(set.title) + '.json', JSON.stringify({ v: 1, t: set.title, d: set.description || '', e: set.emoji, c: set.cards.map(x => [x.term, x.def]) }, null, 2));
+  $('#share-print', m).onclick = () => printSet(set);
+}
+function printSet(set){
+  const w = window.open('', '_blank');
+  if (!w){ toast('Allow popups to print', 'error'); return; }
+  const rows = set.cards.map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.term)}</td><td>${esc(c.def)}</td></tr>`).join('');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(set.title)} — Cardly</title><style>body{font-family:system-ui,sans-serif;margin:32px;color:#222}h1{font-size:22px}table{width:100%;border-collapse:collapse;margin-top:16px}td,th{border:1px solid #ccc;padding:10px 12px;text-align:left;vertical-align:top}th{background:#f2f3f7}td:first-child{width:36px;color:#888}@media print{body{margin:0}}</style></head><body><h1>${esc(set.emoji || '')} ${esc(set.title)}</h1><p>${esc(set.description || '')}</p><table><thead><tr><th>#</th><th>Term</th><th>Definition</th></tr></thead><tbody>${rows}</tbody></table><script>setTimeout(function(){window.print()},350)<\/script></body></html>`);
+  w.document.close();
+}
+function openImportModal(){
+  const m = openModal(`<h3 class="modal-title">📥 Import</h3>
+    <p class="modal-hint">Paste a <b>share link</b> or <b>JSON</b> from another Cardly user — or open a backup file.</p>
+    <textarea class="input bulk-ta" id="imp-ta" placeholder="https://…/#import=…   or   { …json… }"></textarea>
+    <div class="modal-actions spread">
+      <button class="btn outline file-btn" id="imp-file-btn">${ICON.upload}<span>Open .json file</span><input type="file" id="imp-file" accept=".json,application/json,text/plain"></button>
+      <button class="btn primary" id="imp-go">Import</button>
+    </div>`, { wide: true });
+  $('#imp-file', m).onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { $('#imp-ta', m).value = String(r.result || ''); };
+    r.readAsText(f);
+  };
+  $('#imp-go', m).onclick = () => {
+    try {
+      const imported = parseImportText($('#imp-ta', m).value).filter(s => s.cards.length);
+      if (!imported.length) throw new Error('That set has no cards');
+      imported.forEach(s => sets.unshift(s));
+      saveSets(); closeModal();
+      toast('Imported ' + imported.length + ' set' + (imported.length === 1 ? '' : 's') + ' ✨', 'success');
+      if (location.hash === '#home') route(); else location.hash = '#home';
+    } catch (err) { toast(err.message || 'Import failed', 'error'); }
+  };
+  setTimeout(() => $('#imp-ta', m).focus(), 60);
+}
+function checkImportHash(){
+  const h = location.hash || '';
+  if (!h.startsWith('#import=')) return false;
+  try {
+    const arr = normalizeImport(decodeSet(h.slice(8)));
+    const s = arr[0];
+    const m = openModal(`<div class="import-preview">
+        <span class="set-emoji xl">${esc(s.emoji)}</span>
+        <h3 style="margin-top:8px">${esc(s.title)}</h3>
+        <p class="muted">${s.cards.length} cards${s.description ? ' · ' + esc(s.description) : ''}</p>
+        <p class="modal-hint">Someone shared this set with you. Add it to your sets?</p>
+      </div>
+      <div class="modal-actions"><button class="btn ghost" data-x>Not now</button><button class="btn primary" id="imp-yes">Add to my sets</button></div>`);
+    $('#imp-yes', m).onclick = () => {
+      sets.unshift(s); saveSets(); closeModal();
+      toast('Set added 🎉', 'success');
+      if (location.hash === '#home') route(); else location.hash = '#home';
+    };
+    return true;
+  } catch (e) { toast('That share link looks broken', 'error'); return false; }
+}
+
+/* ---------- study router ---------- */
+function renderStudy(id, mode){
+  const set = findSet(id);
+  if (!set){ location.hash = '#home'; return; }
+  if (!oneOffCards && !studyCards(set).length){
+    $('#app').innerHTML = `<div class="empty big">${ICON.layers}<p><b>Nothing to study here${prefs.starredOnly ? ' — no starred cards match your filter' : ''}.</b></p><a class="btn primary" href="#set/${set.id}">Back to set</a></div>`;
+    return;
+  }
+  const map = { flashcards: flashcardsView, learn: learnView, test: testView, match: matchView };
+  (map[mode] || flashcardsView)(set);
+}
+
+/* ---------- global keys ---------- */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ if ($('#modal-root').firstElementChild) closeModal(); return; }
+  const t = e.target;
+  const typing = t && ((t.tagName || '').toLowerCase() === 'input' || (t.tagName || '').toLowerCase() === 'textarea' || (t.tagName || '').toLowerCase() === 'select' || t.isContentEditable);
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'j'){ e.preventDefault(); setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'); return; }
+  if (typing) return;
+  if (!$('#modal-root').firstElementChild){
+    if (e.key === '?'){ openShortcuts(); return; }
+    if (keyHandler) keyHandler(e);
+  }
+});
+
+/* ---------- boot ---------- */
+function setUser(u){
+  if (u){ user.uid = u.uid; user.name = u.displayName || (u.email || 'Learner').split('@')[0]; user.email = u.email || ''; user.photo = u.photoURL || ''; }
+  else { user.uid = null; user.name = null; user.email = null; user.photo = null; }
+}
+function guestOn(){ try { return localStorage.getItem('cardly:guest') === '1'; } catch (e) { return false; } }
+function hideSplash(){ const sp = $('#splash'); if (sp && !sp.classList.contains('hide')){ sp.classList.add('hide'); setTimeout(() => sp.remove(), 500); } }
+function enterApp(){
+  entered = true;
+  loadSets();
+  prefs = Object.assign({ shuffle: false, autoSpeak: false, starredOnly: false }, store.get('prefs', {}));
+  renderHeader(); hideSplash(); route(); checkImportHash();
+  if (user.uid && window.$db) syncOnSignIn();
+}
+function toLogin(){ entered = false; renderHeader(); renderLogin(); hideSplash(); }
+window.addEventListener('hashchange', () => { if (entered) route(); });
+renderHeader();
+let booted = false;
+function boot(){
+  if (booted) return; booted = true;
+  if (window.$auth){
+    window.$auth.onAuthStateChanged(u => {
+      if (u){ try { localStorage.setItem('cardly:guest', '0'); } catch (e) {} setUser(u); enterApp(); }
+      else if (guestOn()){ setUser(null); enterApp(); }
+      else { setUser(null); toLogin(); }
+    });
+  } else {
+    try { localStorage.setItem('cardly:guest', '1'); } catch (e) {}
+    setUser(null); enterApp();
+    toast('Firebase couldn\u2019t load (offline?) — running in guest mode');
+  }
+}
+if (window.$authReady === true) boot();
+else {
+  document.addEventListener('auth-ready', boot, { once: true });
+  setTimeout(boot, 9000);
+}
+</script>
+</body>
+</html>
